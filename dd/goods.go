@@ -52,7 +52,7 @@ func parseNormalGoods(g gjson.Result) (error, NormalGoods) {
 	return nil, r
 }
 
-func (s *DingdongSession) CheckGoods() error {
+func (s *SamsClubSession) CheckGoods() error {
 	urlPath := "https://api-sams.walmartmobile.cn/api/v1/sams/trade/settlement/checkGoodsInfo"
 
 	data := make(map[string]interface{})

@@ -43,7 +43,7 @@ func parseFloorInfos(g gjson.Result) (error, FloorInfo) {
 
 	return nil, r
 }
-func (s *DingdongSession) GetCart(result gjson.Result) error {
+func (s *SamsClubSession) GetCart(result gjson.Result) error {
 	c := Cart{
 		FloorInfoList: make([]FloorInfo, 0),
 	}
@@ -60,7 +60,7 @@ func (s *DingdongSession) GetCart(result gjson.Result) error {
 	return nil
 }
 
-func (s *DingdongSession) CheckCart() error {
+func (s *SamsClubSession) CheckCart() error {
 	urlPath := "https://api-sams.walmartmobile.cn/api/v1/sams/trade/cart/getUserCart"
 
 	data := make(map[string]interface{})

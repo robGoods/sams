@@ -39,7 +39,7 @@ func parseAddress(addressMap gjson.Result) (Address, error) {
 	return address, nil
 }
 
-func (s *DingdongSession) GetAddress() (error, []Address) {
+func (s *SamsClubSession) GetAddress() (error, []Address) {
 	urlPath := "https://api-sams.walmartmobile.cn/api/v1/sams/sams-user/receiver_address/address_list"
 	req := s.NewRequest("GET", urlPath, nil)
 

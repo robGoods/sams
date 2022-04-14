@@ -23,7 +23,7 @@ type Store struct {
 	DeliveryModeId          string `json:"deliveryModeId"`
 }
 
-func (s *DingdongSession) GetStoreList(result gjson.Result) error {
+func (s *SamsClubSession) GetStoreList(result gjson.Result) error {
 	c := make([]Store, 0)
 
 	for _, v := range result.Get("data.storeList").Array() {
@@ -41,7 +41,7 @@ func (s *DingdongSession) GetStoreList(result gjson.Result) error {
 
 }
 
-func (s *DingdongSession) CheckStore() error {
+func (s *SamsClubSession) CheckStore() error {
 	urlPath := "https://api-sams.walmartmobile.cn/api/v1/sams/merchant/storeApi/getRecommendStoreListByLocation"
 
 	data := StoreListParam{

@@ -59,7 +59,7 @@ func parseCapacity(g gjson.Result) (error, CapCityResponse) {
 	return nil, capacity
 }
 
-func (s *DingdongSession) GetCapacity(result gjson.Result) error {
+func (s *SamsClubSession) GetCapacity(result gjson.Result) error {
 	var capCityResponseList []CapCityResponse
 	for _, v := range result.Get("data.capcityResponseList").Array() {
 		_, product := parseCapacity(v)
@@ -73,7 +73,7 @@ func (s *DingdongSession) GetCapacity(result gjson.Result) error {
 	return nil
 }
 
-func (s *DingdongSession) CheckCapacity() error {
+func (s *SamsClubSession) CheckCapacity() error {
 	urlPath := "https://api-sams.walmartmobile.cn/api/v1/sams/delivery/portal/getCapacityData"
 
 	data := make(map[string]interface{})

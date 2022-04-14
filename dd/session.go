@@ -22,7 +22,7 @@ type Config struct {
 	Trackinfo    string
 }
 
-type DingdongSession struct {
+type SamsClubSession struct {
 	Conf               Config
 	Address            Address            `json:"address"`
 	Uid                string             `json:"uid"`
@@ -39,7 +39,7 @@ type DingdongSession struct {
 	Cart               Cart               `json:"cart"`
 }
 
-func (s *DingdongSession) InitSession(conf Config) error {
+func (s *SamsClubSession) InitSession(conf Config) error {
 	fmt.Println("########## 初始化 ##########")
 	s.Client = &http.Client{Timeout: 60 * time.Second}
 	s.Conf = conf
@@ -90,7 +90,7 @@ func (s *DingdongSession) InitSession(conf Config) error {
 	return nil
 }
 
-func (s *DingdongSession) NewRequest(method, url string, dataStr []byte) *http.Request {
+func (s *SamsClubSession) NewRequest(method, url string, dataStr []byte) *http.Request {
 
 	var body io.Reader = nil
 	if dataStr != nil {

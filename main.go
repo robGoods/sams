@@ -8,7 +8,7 @@ import (
 )
 
 func main() {
-	session := dd.DingdongSession{}
+	session := dd.SamsClubSession{}
 	conf := dd.Config{
 		AuthToken:    "xxxxx", //HTTP头部auth-token
 		BarkId:       "",      //通知用的bark id，下载bark后从app界面获取, 如果不需要可以填空字符串
