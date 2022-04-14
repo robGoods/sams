@@ -10,29 +10,32 @@ import (
 )
 
 type DingdongSession struct {
-	AuthToken      string         `json:"auth-token"`
-	BarkId         string         `json:"bark_id"`
-	FloorId        int            `json:"floorId"` // 1,普通商品 2,全球购保税 3,特殊订购自提 4,大件商品 5,厂家直供商品 6,特殊订购商品 7,失效商品
-	Address        Address        `json:"address"`
-	Uid            string         `json:"uid"`
-	Capacity       Capacity       `json:"capacity"`
-	Channel        string         `json:"channel"` //0 => wechat  1 =>alipay
-	SettleInfo     SettleInfo     `json:"settleInfo"`
-	DeliveryInfoVO DeliveryInfoVO `json:"deliveryInfoVO"`
-	GoodsList      []Goods        `json:"goods"`
-	FloorInfo      FloorInfo      `json:"floorInfo"`
-	StoreList      []Store        `json:"store"`
-	OrderInfo      OrderInfo      `json:"orderInfo"`
-	Client         *http.Client   `json:"client"`
-	Cart           Cart           `json:"cart"`
+	AuthToken          string             `json:"auth-token"`
+	BarkId             string             `json:"bark_id"`
+	FloorId            int                `json:"floorId"`      // 1,普通商品 2,全球购保税 3,特殊订购自提 4,大件商品 5,厂家直供商品 6,特殊订购商品 7,失效商品
+	DeliveryType       int                `json:"deliveryType"` //1 急速达，2， 全程配送
+	Address            Address            `json:"address"`
+	Uid                string             `json:"uid"`
+	Capacity           Capacity           `json:"capacity"`
+	Channel            string             `json:"channel"` //0 => wechat  1 =>alipay
+	SettleInfo         SettleInfo         `json:"settleInfo"`
+	DeliveryInfoVO     DeliveryInfoVO     `json:"deliveryInfoVO"`
+	SettleDeliveryInfo SettleDeliveryInfo `json:"settleDeliveryInfo"`
+	GoodsList          []Goods            `json:"goods"`
+	FloorInfo          FloorInfo          `json:"floorInfo"`
+	StoreList          []Store            `json:"store"`
+	OrderInfo          OrderInfo          `json:"orderInfo"`
+	Client             *http.Client       `json:"client"`
+	Cart               Cart               `json:"cart"`
 }
 
-func (s *DingdongSession) InitSession(AuthToken, barkId string, FloorId int) error {
+func (s *DingdongSession) InitSession(AuthToken, barkId string, floorId, deliveryType int) error {
 	fmt.Println("########## 初始化 ##########")
 	s.Client = &http.Client{Timeout: 60 * time.Second}
 	s.AuthToken = AuthToken
 	s.BarkId = barkId
-	s.FloorId = FloorId //普通商品
+	s.FloorId = floorId
+	s.DeliveryType = deliveryType
 
 	err, addrList := s.GetAddress()
 	if err != nil {

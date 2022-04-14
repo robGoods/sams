@@ -16,6 +16,18 @@ type CapCityResponse struct {
 	DeliveryDesc   string `json:"deliveryDesc"`
 	DeliveryDescEn string `json:"deliveryDescEn"`
 	DateISFull     bool   `json:"dateISFull"`
+	List           []List `json:"list"`
+}
+
+type List struct {
+	StartTime     string `json:"startTime"`
+	EndTime       string `json:"endTime"`
+	TimeISFull    bool   `json:"timeISFull"`
+	Disabled      bool   `json:"disabled"`
+	CloseDate     string `json:"closeDate"`
+	CloseTime     string `json:"closeTime"`
+	StartRealTime string `json:"startRealTime"` //1649984400000
+	EndRealTime   string `json:"endRealTime"`   //1650016800000
 }
 
 type Capacity struct {
@@ -25,20 +37,28 @@ type Capacity struct {
 }
 
 func parseCapacity(g gjson.Result) (error, CapCityResponse) {
-	var sizes []map[string]interface{}
-	for _, size := range g.Get("sizes").Array() {
-		sizes = append(sizes, size.Value().(map[string]interface{}))
+	var list []List
+	for _, v := range g.Get("list").Array() {
+		list = append(list, List{
+			StartTime:     v.Get("startTime").Str,
+			EndTime:       v.Get("endTime").Str,
+			TimeISFull:    v.Get("timeISFull").Bool(),
+			Disabled:      v.Get("disabled").Bool(),
+			CloseDate:     v.Get("closeDate").Str,
+			CloseTime:     v.Get("closeTime").Str,
+			StartRealTime: v.Get("startRealTime").Str,
+			EndRealTime:   v.Get("endRealTime").Str,
+		})
 	}
 	capacity := CapCityResponse{
 		StrDate:        g.Get("strDate").Str,
 		DeliveryDesc:   g.Get("deliveryDesc").Str,
 		DeliveryDescEn: g.Get("deliveryDescEn").Str,
 		DateISFull:     g.Get("dateISFull").Bool(),
+		List:           list,
 	}
 	return nil, capacity
 }
-
-
 
 func (s *DingdongSession) GetCapacity(result gjson.Result) error {
 	var capCityResponseList []CapCityResponse
@@ -59,9 +79,11 @@ func (s *DingdongSession) CheckCapacity() error {
 
 	data := make(map[string]interface{})
 	data["perDateList"] = []string{time.Now().Format("2006-01-02"), time.Now().AddDate(0, 0, 1).Format("2006-01-02")}
-	data["storeDeliveryTemplateId"] = "703398195375534614"
+	data["storeDeliveryTemplateId"] = s.DeliveryInfoVO.StoreDeliveryTemplateId
+	if s.SettleInfo.SettleDelivery.StoreDeliveryTemplateId != "" {
+		data["storeDeliveryTemplateId"] = s.SettleInfo.SettleDelivery.StoreDeliveryTemplateId
+	}
 	dataStr, _ := json.Marshal(data)
-
 	req, _ := http.NewRequest("POST", urlPath, bytes.NewReader(dataStr))
 	req.Header.Set("Host", "api-sams.walmartmobile.cn")
 	req.Header.Set("content-type", "application/json")
