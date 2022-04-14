@@ -1,5 +1,7 @@
 # robSams
 
+[![Build Status](https://app.travis-ci.com/robGoods/sams.svg?branch=master)](https://app.travis-ci.com/robGoods/sams)
+
 [sam's blog](https://robgoods.github.io/sams/)
 
 ## 感谢
