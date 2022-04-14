@@ -96,7 +96,6 @@ func (s *DingdongSession) CheckCapacity() error {
 
 	resp.Body.Close()
 	if resp.StatusCode == 200 {
-		fmt.Println(string(body))
 		result := gjson.Parse(string(body))
 		switch result.Get("code").Str {
 		case "Success":
