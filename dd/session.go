@@ -43,6 +43,7 @@ func (s *DingdongSession) InitSession(conf Config) error {
 	fmt.Println("########## 初始化 ##########")
 	s.Client = &http.Client{Timeout: 60 * time.Second}
 	s.Conf = conf
+	stdin := bufio.NewReader(os.Stdin)
 
 	err, addrList := s.GetAddress()
 	if err != nil {
@@ -58,7 +59,6 @@ func (s *DingdongSession) InitSession(conf Config) error {
 	var index int
 	for true {
 		fmt.Println("请输入地址序号（0, 1, 2...)：")
-		stdin := bufio.NewReader(os.Stdin)
 		_, err := fmt.Fscanln(stdin, &index)
 		if err != nil {
 			fmt.Printf("输入有误：%s!\n", err)
@@ -73,7 +73,6 @@ func (s *DingdongSession) InitSession(conf Config) error {
 	fmt.Println("########## 选择支付方式 ##########")
 	for true {
 		fmt.Println("请输入支付方式序号（0：微信 1：支付宝)：")
-		stdin := bufio.NewReader(os.Stdin)
 		_, err := fmt.Fscanln(stdin, &index)
 		if err != nil {
 			fmt.Printf("输入有误：%s!\n", err)
