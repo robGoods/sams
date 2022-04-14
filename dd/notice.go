@@ -8,7 +8,7 @@ import (
 )
 
 func (s *DingdongSession) PushSuccess(msg string) error {
-	urlPath := fmt.Sprintf("https://api.day.app/%s/%s?sound=minuet", s.BarkId, msg)
+	urlPath := fmt.Sprintf("https://api.day.app/%s/%s?sound=minuet", s.Conf.BarkId, msg)
 	req, _ := http.NewRequest("GET", urlPath, nil)
 	resp, err := s.Client.Do(req)
 	if err != nil {

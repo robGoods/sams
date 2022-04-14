@@ -2,13 +2,25 @@ package main
 
 import (
 	"fmt"
-	"github.com/robGoods/sams/dd"
 	"time"
+
+	"github.com/robGoods/sams/dd"
 )
 
 func main() {
 	session := dd.DingdongSession{}
-	err := session.InitSession("xxxxxxxxxxxx", "xxxxxxxxxx", 1, 2)
+	conf := dd.Config{
+		AuthToken:    "xxxxx", //HTTP头部auth-token
+		BarkId:       "xxxxx", //通知用的bark id，下载bark后从app界面获取, 如果不需要可以填空字符串
+		FloorId:      1,       //1,普通商品 2,全球购保税 3,特殊订购自提 4,大件商品 5,厂家直供商品 6,特殊订购商品 7,失效商品
+		DeliveryType: 2,       //1 急速达，2， 全程配送
+		Longitude:    "xxxxx", //HTTP头部longitude
+		Latitude:     "xxxxx", //HTTP头部latitude
+		Deviceid:     "xxxxx", //HTTP头部device-id
+		Trackinfo:    `xxxxx`, // HTTP头部track-info
+	}
+
+	err := session.InitSession(conf)
 
 	if err != nil {
 		fmt.Println(err)
@@ -31,7 +43,7 @@ func main() {
 		fmt.Printf("########## 获取购物车中有效商品【%s】 ###########\n", time.Now().Format("15:04:05"))
 		session.CheckCart()
 		for _, v := range session.Cart.FloorInfoList {
-			if v.FloorId == session.FloorId {
+			if v.FloorId == session.Conf.FloorId {
 				for index, goods := range v.NormalGoodsList {
 					session.GoodsList = append(session.GoodsList, goods.ToGoods())
 					fmt.Printf("[%v] %s 数量：%v 总价：%d\n", index, goods.GoodsName, goods.Quantity, goods.Price)
@@ -89,7 +101,7 @@ func main() {
 		session.SettleDeliveryInfo = dd.SettleDeliveryInfo{}
 		for _, caps := range session.Capacity.CapCityResponseList {
 			for _, v := range caps.List {
-				fmt.Printf("配送时间： %s %s - %s, 是否可用：%v\n", v.CloseDate, v.StartTime, v.EndTime, !v.TimeISFull && !v.Disabled)
+				fmt.Printf("配送时间： %s %s - %s, 是否可用：%v\n", caps.StrDate, v.StartTime, v.EndTime, !v.TimeISFull && !v.Disabled)
 				if v.TimeISFull == false && v.Disabled == false && session.SettleDeliveryInfo.ArrivalTimeStr == "" {
 					session.SettleDeliveryInfo.ArrivalTimeStr = fmt.Sprintf("%s %s - %s", caps.StrDate, v.StartTime, v.EndTime)
 					session.SettleDeliveryInfo.ExpectArrivalTime = v.StartRealTime
@@ -111,7 +123,7 @@ func main() {
 		fmt.Printf("########## 提交订单中【%s】 ###########\n", time.Now().Format("15:04:05"))
 		if err == nil {
 			fmt.Println("抢购成功，请前往app付款！")
-			if session.BarkId != "" {
+			if session.Conf.BarkId != "" {
 				for true {
 					err = session.PushSuccess(fmt.Sprintf("Smas抢单成功，订单号：%s", session.OrderInfo.OrderNo))
 					if err == nil {
