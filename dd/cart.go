@@ -66,7 +66,6 @@ func (s *DingdongSession) CheckCart() error {
 	data := make(map[string]interface{})
 	data["uid"] = ""
 	data["storeList"] = s.StoreList
-	data["storeList"] = s.StoreList
 	data["homePagelongitude"] = s.Address.Longitude
 	data["homePagelatitude"] = s.Address.Latitude
 

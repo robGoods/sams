@@ -67,7 +67,7 @@ func (s *DingdongSession) NewRequest(method, url string, dataStr []byte) *http.R
 
 func (s *DingdongSession) InitSession(conf Config, FloorId int) error {
 	fmt.Println("########## 初始化 ##########")
-	s.Client = &http.Client{Timeout: 60 * time.Second}
+	s.Client = &http.Client{Timeout: 10 * time.Second}
 	s.Conf = conf
 	s.FloorId = FloorId //普通商品
 
