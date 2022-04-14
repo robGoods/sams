@@ -11,29 +11,29 @@ import (
 )
 
 type CommitPayPram struct {
-	GoodsList          []Goods                `json:"goodsList"`
-	InvoiceInfo        map[int]interface{}    `json:"invoiceInfo"`
-	CartDeliveryType   int                    `json:"cartDeliveryType"`
-	FloorId            int                    `json:"floorId"`
-	Amount             string                 `json:"amount"`
-	PurchaserName      string                 `json:"purchaserName"`
-	SettleDeliveryInfo map[string]interface{} `json:"settleDeliveryInfo"`
-	TradeType          string                 `json:"tradeType"` //"APP"
-	PurchaserId        string                 `json:"purchaserId"`
-	PayType            int                    `json:"payType"`
-	Currency           string                 `json:"currency"`     // CNY
-	Channel            string                 `json:"channel"`      // wechat
-	ShortageId         int                    `json:"shortageId"`   //1
-	IsSelfPickup       int                    `json:"isSelfPickup"` //0
-	OrderType          int                    `json:"orderType"`    //0
-	Uid                string                 `json:"uid"`          //273583094,
-	AppId              string                 `json:"appId"`        //wx57364320cb03dfba
-	AddressId          string                 `json:"addressId"`
-	DeliveryInfoVO     DeliveryInfoVO         `json:"deliveryInfoVO"`
-	Remark             string                 `json:"remark"`
-	StoreInfo          StoreInfo              `json:"storeInfo"`
-	ShortageDesc       string                 `json:"shortageDesc"`
-	PayMethodId        string                 `json:"payMethodId"`
+	GoodsList          []Goods             `json:"goodsList"`
+	InvoiceInfo        map[int]interface{} `json:"invoiceInfo"`
+	DeliveryType       int                 `json:"cartDeliveryType"`
+	FloorId            int                 `json:"floorId"`
+	Amount             string              `json:"amount"`
+	PurchaserName      string              `json:"purchaserName"`
+	SettleDeliveryInfo SettleDeliveryInfo  `json:"settleDeliveryInfo"`
+	TradeType          string              `json:"tradeType"` //"APP"
+	PurchaserId        string              `json:"purchaserId"`
+	PayType            int                 `json:"payType"`
+	Currency           string              `json:"currency"`     // CNY
+	Channel            string              `json:"channel"`      // wechat
+	ShortageId         int                 `json:"shortageId"`   //1
+	IsSelfPickup       int                 `json:"isSelfPickup"` //0
+	OrderType          int                 `json:"orderType"`    //0
+	Uid                string              `json:"uid"`          //273583094,
+	AppId              string              `json:"appId"`        //wx57364320cb03dfba
+	AddressId          string              `json:"addressId"`
+	DeliveryInfoVO     DeliveryInfoVO      `json:"deliveryInfoVO"`
+	Remark             string              `json:"remark"`
+	StoreInfo          StoreInfo           `json:"storeInfo"`
+	ShortageDesc       string              `json:"shortageDesc"`
+	PayMethodId        string              `json:"payMethodId"`
 }
 
 type OrderInfo struct {
@@ -48,6 +48,13 @@ type PayInfo struct {
 	PayInfo    string `json:"PayInfo"`
 	OutTradeNo string `json:"OutTradeNo"`
 	TotalAmt   int    `json:"TotalAmt"`
+}
+
+type SettleDeliveryInfo struct {
+	DeliveryType         int    `json:"deliveryType"`         //默认0
+	ExpectArrivalTime    string `json:"expectArrivalTime"`    //配送时间: 1649922300000
+	ExpectArrivalEndTime string `json:"expectArrivalEndTime"` //配送时间
+	ArrivalTimeStr       string `json:"-"`
 }
 
 func (s *DingdongSession) GetOrderInfo(result gjson.Result) error {
@@ -71,28 +78,27 @@ func (s *DingdongSession) CommitPay() error {
 	data := CommitPayPram{
 		GoodsList:          s.GoodsList,
 		InvoiceInfo:        make(map[int]interface{}),
-		CartDeliveryType:   2, // 1,急速到达 2,全城配送
-		FloorId:            0,
-		Amount:             "13123", //测试没用但必须有
+		DeliveryType:       s.DeliveryType, // 1,急速到达 2,全城配送
+		FloorId:            0,              //急速时选1
+		Amount:             "13123",        //测试没用但必须有
 		PurchaserName:      "",
-		SettleDeliveryInfo: map[string]interface{}{"deliveryType": 0},
-		//SettleDeliveryInfo: map[string]interface{}{"deliveryType": 0, "expectArrivalTime": nil, "expectArrivalEndTime": nil},
-		TradeType:      "APP",
-		PurchaserId:    "",
-		PayType:        0,
-		Currency:       "CNY",
-		Channel:        s.Channel,
-		ShortageId:     1,
-		IsSelfPickup:   0,
-		OrderType:      0,
-		Uid:            "213123", //s.Uid,
-		AppId:          fmt.Sprintf("wx51394321bc03adfadf"),
-		AddressId:      s.Address.AddressId,
-		DeliveryInfoVO: s.DeliveryInfoVO,
-		Remark:         "",
-		StoreInfo:      s.FloorInfo.StoreInfo,
-		ShortageDesc:   "其他商品继续配送（缺货商品直接退款）",
-		PayMethodId:    "1486659732",
+		SettleDeliveryInfo: s.SettleDeliveryInfo,
+		TradeType:          "APP",
+		PurchaserId:        "",
+		PayType:            0,
+		Currency:           "CNY",
+		Channel:            s.Channel,
+		ShortageId:         1,
+		IsSelfPickup:       0,
+		OrderType:          0,
+		Uid:                "213123", //s.Uid,
+		AppId:              fmt.Sprintf("wx51394321bc03adfadf"),
+		AddressId:          s.Address.AddressId,
+		DeliveryInfoVO:     s.DeliveryInfoVO,
+		Remark:             "",
+		StoreInfo:          s.FloorInfo.StoreInfo,
+		ShortageDesc:       "其他商品继续配送（缺货商品直接退款）",
+		PayMethodId:        "1486659732",
 	}
 
 	dataStr, err := json.Marshal(data)
@@ -136,6 +142,10 @@ func (s *DingdongSession) CommitPay() error {
 			return errors.New(result.Get("data.failReason").Str)
 		case "LIMITED":
 			return LimitedErr1
+		case "CLOSE_ORDER_TIME_EXCEPTION":
+			return CloseOrderTimeExceptionErr
+		case "DECREASE_CAPACITY_COUNT_ERROR":
+			return DecreaseCapacityCountError
 		default:
 			return errors.New(result.Get("msg").Str)
 		}

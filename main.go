@@ -8,7 +8,7 @@ import (
 
 func main() {
 	session := dd.DingdongSession{}
-	err := session.InitSession("xxxxxxxxxxxx", "xxxxxxxxxx", 1) // 1,普通商品 2,全球购保税 3,特殊订购自提 4,大件商品 5,厂家直供商品 6,特殊订购商品 7,失效商品
+	err := session.InitSession("xxxxxxxxxxxx", "xxxxxxxxxx", 1, 2)
 
 	if err != nil {
 		fmt.Println(err)
@@ -65,11 +65,13 @@ func main() {
 			}
 		}
 		if err = session.CheckSettleInfo(); err != nil {
-			fmt.Println(err)
+			fmt.Printf("校验商品失败：%s\n", err)
 			switch err {
 			case dd.CartGoodChangeErr:
 				goto CartLoop
 			case dd.LimitedErr:
+				goto GoodsLoop
+			case dd.NoMatchDeliverMode:
 				goto GoodsLoop
 			default:
 				goto GoodsLoop
@@ -84,15 +86,22 @@ func main() {
 			continue
 		}
 
-		dateISFull := true
-		for _, capCityResponse := range session.Capacity.CapCityResponseList {
-			if capCityResponse.DateISFull == false && dateISFull {
-				dateISFull = false
-				fmt.Printf("发现可用的配送时段:%s!\n", capCityResponse.StrDate)
+		session.SettleDeliveryInfo = dd.SettleDeliveryInfo{}
+		for _, caps := range session.Capacity.CapCityResponseList {
+			for _, v := range caps.List {
+				fmt.Printf("配送时间： %s %s - %s, 是否可用：%v\n", v.CloseDate, v.StartTime, v.EndTime, !v.TimeISFull && !v.Disabled)
+				if v.TimeISFull == false && v.Disabled == false && session.SettleDeliveryInfo.ArrivalTimeStr == "" {
+					session.SettleDeliveryInfo.ArrivalTimeStr = fmt.Sprintf("%s %s - %s", caps.StrDate, v.StartTime, v.EndTime)
+					session.SettleDeliveryInfo.ExpectArrivalTime = v.StartRealTime
+					session.SettleDeliveryInfo.ExpectArrivalEndTime = v.EndRealTime
+					break
+				}
 			}
 		}
 
-		if dateISFull {
+		if session.SettleDeliveryInfo.ArrivalTimeStr != "" {
+			fmt.Printf("发现可用的配送时段::%s!\n", session.SettleDeliveryInfo.ArrivalTimeStr)
+		} else {
 			fmt.Println("当前无可用配送时间段")
 			time.Sleep(1 * time.Second)
 			goto CapacityLoop
@@ -100,8 +109,7 @@ func main() {
 	OrderLoop:
 		err = session.CommitPay()
 		fmt.Printf("########## 提交订单中【%s】 ###########\n", time.Now().Format("15:04:05"))
-		switch err {
-		case nil:
+		if err == nil {
 			fmt.Println("抢购成功，请前往app付款！")
 			if session.BarkId != "" {
 				for true {
@@ -114,12 +122,19 @@ func main() {
 					time.Sleep(1 * time.Second)
 				}
 			}
-			return
-		case dd.LimitedErr1:
-			fmt.Printf("[%s] 立即重试...\n", err)
-			goto OrderLoop
-		default:
-			goto CartLoop
+		} else {
+			fmt.Printf("下单失败：%s\n", err)
+			switch err {
+			case dd.LimitedErr1:
+				fmt.Println("立即重试...")
+				goto OrderLoop
+			case dd.CloseOrderTimeExceptionErr:
+				goto CapacityLoop
+			case dd.DecreaseCapacityCountError:
+				goto CapacityLoop
+			default:
+				goto CapacityLoop
+			}
 		}
 	}
 }

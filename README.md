@@ -9,10 +9,13 @@
 ## 使用方式
 在main.go的main函数中修改该行代码
 ```go
-err := session.InitSession("xxxxxxxxxxxxxxxxx", "xxxxxxxxxxxxxxxxx", 1) // 1,普通商品 2,全球购保税 3,特殊订购自提 4,大件商品 5,厂家直供商品 6,特殊订购商品 7,失效商品
+err := session.InitSession("xxxxxxxxxxxxxxxxx", "xxxxxxxxxxxxxxxxx", 1, 2)
 ```
-其中第一个参数为Sam's登录后的HTTP头部auth-token
-第二个参数为通知用的bark id，下载`bark`后从app界面获取, 如果不需要可以填空字符串
+#### 参数说明
+- 其中第一个参数为Sam's登录后的HTTP头部auth-token
+- 第二个参数为通知用的bark id，下载`bark`后从app界面获取, 如果不需要可以填空字符串
+- 第三个参数为购物车中的商品类型：// 1,普通商品 2,全球购保税 3,特殊订购自提 4,大件商品 5,厂家直供商品 6,特殊订购商品 7,失效商品
+- 第四个参数为配送方式：1：急速达，2：全城配送，目前上海地区只开放了全城配送故默认为2
 
 ![bark.png](https://robgoods.github.io/sams/assets/bark.png)
 

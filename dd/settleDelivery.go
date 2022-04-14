@@ -87,30 +87,30 @@ type DeliveryInfoVO struct {
 }
 
 type SettleParam struct {
-	Uid              string         `json:"uid"`
-	AddressId        string         `json:"addressId"`
-	DeliveryInfoVO   DeliveryInfoVO `json:"deliveryInfoVO"`
-	CartDeliveryType int            `json:"cartDeliveryType"`
-	StoreInfo        StoreInfo      `json:"storeInfo"`
-	CouponList       []string       `json:"couponList"`
-	IsSelfPickup     int            `json:"isSelfPickup"`
-	FloorId          int            `json:"floorId"`
-	GoodsList        []Goods        `json:"goodsList"`
+	Uid            string         `json:"uid"`
+	AddressId      string         `json:"addressId"`
+	DeliveryInfoVO DeliveryInfoVO `json:"deliveryInfoVO"`
+	DeliveryType   int            `json:"cartDeliveryType"`
+	StoreInfo      StoreInfo      `json:"storeInfo"`
+	CouponList     []string       `json:"couponList"`
+	IsSelfPickup   int            `json:"isSelfPickup"`
+	FloorId        int            `json:"floorId"`
+	GoodsList      []Goods        `json:"goodsList"`
 }
 
 func (s *DingdongSession) CheckSettleInfo() error {
 	urlPath := "https://api-sams.walmartmobile.cn/api/v1/sams/trade/settlement/getSettleInfo"
 
 	data := SettleParam{
-		Uid:              s.Uid,
-		AddressId:        s.Address.AddressId,
-		DeliveryInfoVO:   s.DeliveryInfoVO,
-		CartDeliveryType: 2,
-		StoreInfo:        s.FloorInfo.StoreInfo,
-		CouponList:       make([]string, 0),
-		IsSelfPickup:     0,
-		FloorId:          s.FloorId,
-		GoodsList:        s.GoodsList,
+		Uid:            s.Uid,
+		AddressId:      s.Address.AddressId,
+		DeliveryInfoVO: s.DeliveryInfoVO,
+		DeliveryType:   s.DeliveryType,
+		StoreInfo:      s.FloorInfo.StoreInfo,
+		CouponList:     make([]string, 0),
+		IsSelfPickup:   0,
+		FloorId:        s.FloorId,
+		GoodsList:      s.GoodsList,
 	}
 
 	dataStr, _ := json.Marshal(data)
@@ -146,6 +146,8 @@ func (s *DingdongSession) CheckSettleInfo() error {
 			return s.GetSettleInfo(result)
 		case "LIMITED":
 			return LimitedErr
+		case "NO_MATCH_DELIVERY_MODE":
+			return NoMatchDeliverMode
 		case "CART_GOOD_CHANGE":
 			return CartGoodChangeErr
 		default:
