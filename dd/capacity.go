@@ -1,14 +1,13 @@
 package dd
 
 import (
-	"bytes"
 	"encoding/json"
 	"errors"
 	"fmt"
-	"github.com/tidwall/gjson"
 	"io/ioutil"
-	"net/http"
 	"time"
+
+	"github.com/tidwall/gjson"
 )
 
 type CapCityResponse struct {
@@ -38,8 +37,6 @@ func parseCapacity(g gjson.Result) (error, CapCityResponse) {
 	return nil, capacity
 }
 
-
-
 func (s *DingdongSession) GetCapacity(result gjson.Result) error {
 	var capCityResponseList []CapCityResponse
 	for _, v := range result.Get("data.capcityResponseList").Array() {
@@ -59,24 +56,10 @@ func (s *DingdongSession) CheckCapacity() error {
 
 	data := make(map[string]interface{})
 	data["perDateList"] = []string{time.Now().Format("2006-01-02"), time.Now().AddDate(0, 0, 1).Format("2006-01-02")}
-	data["storeDeliveryTemplateId"] = "703398195375534614"
+	data["storeDeliveryTemplateId"] = "552578721878546198"
 	dataStr, _ := json.Marshal(data)
 
-	req, _ := http.NewRequest("POST", urlPath, bytes.NewReader(dataStr))
-	req.Header.Set("Host", "api-sams.walmartmobile.cn")
-	req.Header.Set("content-type", "application/json")
-	req.Header.Set("accept", "*/*")
-	//req.Header.Set("auth-token", "xxxxxxxxxxxx")
-	req.Header.Set("auth-token", s.AuthToken)
-	//req.Header.Set("app-version", "5.0.46.1")
-	req.Header.Set("device-type", "ios")
-	req.Header.Set("Accept-Language", "zh-Hans-CN;q=1, en-CN;q=0.9, ga-IE;q=0.8")
-	//req.Header.Set("Accept-Encoding", "gzip, deflate, br")
-	//req.Header.Set("apptype", "ios")
-	//req.Header.Set("device-name", "iPhone12,8")
-	//req.Header.Set("device-os-version", "13.4.1")
-	req.Header.Set("User-Agent", "SamClub/5.0.46 (iPhone; iOS 13.4.1; Scale/2.00)")
-	req.Header.Set("system-language", "CN")
+	req := s.NewRequest("POST", urlPath, dataStr)
 
 	resp, err := s.Client.Do(req)
 	if err != nil {

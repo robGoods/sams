@@ -2,16 +2,26 @@ package dd
 
 import (
 	"bufio"
+	"bytes"
 	"errors"
 	"fmt"
+	"io"
 	"net/http"
 	"os"
 	"time"
 )
 
+type Config struct {
+	AuthToken string
+	BarkId    string
+	Longitude string
+	Latitude  string
+	Deviceid  string
+	Trackinfo string
+}
+
 type DingdongSession struct {
-	AuthToken      string         `json:"auth-token"`
-	BarkId         string         `json:"bark_id"`
+	Conf           Config
 	FloorId        int            `json:"floorId"` // 1,普通商品 2,全球购保税 3,特殊订购自提 4,大件商品 5,厂家直供商品 6,特殊订购商品 7,失效商品
 	Address        Address        `json:"address"`
 	Uid            string         `json:"uid"`
@@ -27,11 +37,38 @@ type DingdongSession struct {
 	Cart           Cart           `json:"cart"`
 }
 
-func (s *DingdongSession) InitSession(AuthToken, barkId string, FloorId int) error {
+func (s *DingdongSession) NewRequest(method, url string, dataStr []byte) *http.Request {
+
+	var body io.Reader = nil
+	if dataStr != nil {
+		body = bytes.NewReader(dataStr)
+	}
+	req, _ := http.NewRequest(method, url, body)
+
+	req.Header.Set("Host", "api-sams.walmartmobile.cn")
+	req.Header.Set("content-type", "application/json;charset=UTF-8")
+	//req.Header.Set("accept", "*/*")
+	req.Header.Set("auth-token", s.Conf.AuthToken)
+	req.Header.Set("longitude", s.Conf.Longitude)
+	req.Header.Set("latitude", s.Conf.Latitude)
+	req.Header.Set("device-id", s.Conf.Deviceid)
+	req.Header.Set("app-version", "5.0.47.0")
+	req.Header.Set("device-type", "ios")
+	req.Header.Set("Accept-Language", "zh-Hans-CN;q=1")
+	//req.Header.Set("Accept-Encoding", "gzip, deflate, br")
+	req.Header.Set("apptype", "ios")
+	req.Header.Set("device-name", "iPhone14,5")
+	req.Header.Set("device-os-version", "15.4.1")
+	req.Header.Set("User-Agent", "SamClub/5.0.47 (iPhone; iOS 15.4.1; Scale/3.00)")
+	req.Header.Set("system-language", "CN")
+
+	return req
+}
+
+func (s *DingdongSession) InitSession(conf Config, FloorId int) error {
 	fmt.Println("########## 初始化 ##########")
 	s.Client = &http.Client{Timeout: 60 * time.Second}
-	s.AuthToken = AuthToken
-	s.BarkId = barkId
+	s.Conf = conf
 	s.FloorId = FloorId //普通商品
 
 	err, addrList := s.GetAddress()

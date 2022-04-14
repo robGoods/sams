@@ -2,13 +2,22 @@ package main
 
 import (
 	"fmt"
-	"github.com/robGoods/sams/dd"
 	"time"
+
+	"github.com/robGoods/sams/dd"
 )
 
 func main() {
+	conf := dd.Config{
+		AuthToken: "xxxxxx", //HTTP头部auth-token
+		BarkId:    "xxxxx",  //通知用的bark id，下载bark后从app界面获取, 如果不需要可以填空字符串
+		Longitude: "xxxxxx", //HTTP头部longitude
+		Latitude:  "xxxxx",  //HTTP头部latitude
+		Deviceid:  "xxxxx",  //HTTP头部device-id
+		Trackinfo: `xxxxxx`, // HTTP头部track-info
+	}
 	session := dd.DingdongSession{}
-	err := session.InitSession("xxxxxxxxxxxx", "xxxxxxxxxx", 1) // 1,普通商品 2,全球购保税 3,特殊订购自提 4,大件商品 5,厂家直供商品 6,特殊订购商品 7,失效商品
+	err := session.InitSession(conf, 1) // 1,普通商品 2,全球购保税 3,特殊订购自提 4,大件商品 5,厂家直供商品 6,特殊订购商品 7,失效商品
 
 	if err != nil {
 		fmt.Println(err)
@@ -103,7 +112,7 @@ func main() {
 		switch err {
 		case nil:
 			fmt.Println("抢购成功，请前往app付款！")
-			if session.BarkId != "" {
+			if session.Conf.BarkId != "" {
 				for true {
 					err = session.PushSuccess(fmt.Sprintf("Smas抢单成功，订单号：%s", session.OrderInfo.OrderNo))
 					if err == nil {
