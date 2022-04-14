@@ -1,13 +1,12 @@
 package dd
 
 import (
-	"bytes"
 	"encoding/json"
 	"errors"
 	"fmt"
-	"github.com/tidwall/gjson"
 	"io/ioutil"
-	"net/http"
+
+	"github.com/tidwall/gjson"
 )
 
 type CommitPayPram struct {
@@ -78,9 +77,9 @@ func (s *DingdongSession) CommitPay() error {
 	data := CommitPayPram{
 		GoodsList:          s.GoodsList,
 		InvoiceInfo:        make(map[int]interface{}),
-		DeliveryType:       s.DeliveryType, // 1,急速到达 2,全城配送
-		FloorId:            0,              //急速时选1
-		Amount:             "13123",        //测试没用但必须有
+		DeliveryType:       s.Conf.DeliveryType, // 1,急速到达 2,全城配送
+		FloorId:            0,                   //急速时选1
+		Amount:             "13123",             //测试没用但必须有
 		PurchaserName:      "",
 		SettleDeliveryInfo: s.SettleDeliveryInfo,
 		TradeType:          "APP",
@@ -105,23 +104,8 @@ func (s *DingdongSession) CommitPay() error {
 	if err != nil {
 		return err
 	}
-
-	req, _ := http.NewRequest("POST", urlPath, bytes.NewReader(dataStr))
-	req.Header.Set("Host", "api-sams.walmartmobile.cn")
-	req.Header.Set("content-type", "application/json")
-	req.Header.Set("accept", "*/*")
-	//req.Header.Set("auth-token", "xxxxxxxxxxxx")
-	req.Header.Set("auth-token", s.AuthToken)
-	//req.Header.Set("app-version", "5.0.46.1")
-	req.Header.Set("device-type", "ios")
-	req.Header.Set("Accept-Language", "zh-Hans-CN;q=1, en-CN;q=0.9, ga-IE;q=0.8")
-	//req.Header.Set("Accept-Encoding", "gzip, deflate, br")
-	//req.Header.Set("apptype", "ios")
-	//req.Header.Set("device-name", "iPhone12,8")
-	//req.Header.Set("device-os-version", "13.4.1")
-	req.Header.Set("User-Agent", "SamClub/5.0.46 (iPhone; iOS 13.4.1; Scale/2.00)")
-	req.Header.Set("system-language", "CN")
-
+	req := s.NewRequest("POST", urlPath, dataStr)
+	req.Header.Set("track-info", s.Conf.Trackinfo)
 	resp, err := s.Client.Do(req)
 	if err != nil {
 		return err
