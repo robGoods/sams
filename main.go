@@ -44,6 +44,7 @@ func main() {
 		session.CheckCart()
 		for _, v := range session.Cart.FloorInfoList {
 			if v.FloorId == session.Conf.FloorId {
+				session.GoodsList = make([]dd.Goods, 0)
 				for index, goods := range v.NormalGoodsList {
 					session.GoodsList = append(session.GoodsList, goods.ToGoods())
 					fmt.Printf("[%v] %s 数量：%v 总价：%d\n", index, goods.GoodsName, goods.Quantity, goods.Price)
