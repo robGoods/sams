@@ -11,7 +11,7 @@ func main() {
 	session := dd.DingdongSession{}
 	conf := dd.Config{
 		AuthToken:    "xxxxx", //HTTP头部auth-token
-		BarkId:       "xxxxx", //通知用的bark id，下载bark后从app界面获取, 如果不需要可以填空字符串
+		BarkId:       "",      //通知用的bark id，下载bark后从app界面获取, 如果不需要可以填空字符串
 		FloorId:      1,       //1,普通商品 2,全球购保税 3,特殊订购自提 4,大件商品 5,厂家直供商品 6,特殊订购商品 7,失效商品
 		DeliveryType: 2,       //1 急速达，2， 全程配送
 		Longitude:    "xxxxx", //HTTP头部longitude
@@ -134,6 +134,7 @@ func main() {
 					time.Sleep(1 * time.Second)
 				}
 			}
+			return
 		} else {
 			fmt.Printf("下单失败：%s\n", err)
 			switch err {
