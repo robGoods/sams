@@ -154,9 +154,7 @@ func main() {
 			case dd.LimitedErr1:
 				fmt.Println("立即重试...")
 				goto OrderLoop
-			case dd.CloseOrderTimeExceptionErr:
-				goto CapacityLoop
-			case dd.DecreaseCapacityCountError:
+			case dd.CloseOrderTimeExceptionErr, dd.DecreaseCapacityCountError, dd.NotDeliverCapCityErr:
 				goto CapacityLoop
 			case dd.OOSErr:
 				goto CartLoop

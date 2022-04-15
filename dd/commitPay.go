@@ -132,6 +132,8 @@ func (s *DingdongSession) CommitPay() error {
 			return DecreaseCapacityCountError
 		case "OUT_OF_STOCK":
 			return OOSErr
+		case "NOT_DELIVERY_CAPACITY_ERROR":
+			return NotDeliverCapCityErr
 		case "STORE_HAS_CLOSED":
 			return StoreHasClosedError
 		default:
