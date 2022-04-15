@@ -77,6 +77,7 @@ func main() {
 		}
 	GoodsLoop:
 		fmt.Printf("########## 开始校验当前商品【%s】 ###########\n", time.Now().Format("15:04:05"))
+		time.Sleep(50 * time.Millisecond) //校验商品高峰经常失败， 保护一下服务端
 		if err = session.CheckGoods(); err != nil {
 			fmt.Println(err)
 			switch err {
@@ -105,7 +106,8 @@ func main() {
 		if err != nil {
 			fmt.Println(err)
 			time.Sleep(1 * time.Second)
-			continue
+			//刷新可用配送时间， 会出现“服务器正忙,请稍后再试”， 可以忽略。
+			goto CapacityLoop
 		}
 
 		session.SettleDeliveryInfo = dd.SettleDeliveryInfo{}
@@ -155,6 +157,12 @@ func main() {
 				goto CapacityLoop
 			case dd.DecreaseCapacityCountError:
 				goto CapacityLoop
+			case dd.OOSErr:
+				fmt.Println("部分商品已缺货")
+				goto CartLoop
+			case dd.StoreHasClosedError:
+				fmt.Println("门店已打烊")
+				goto StoreLoop
 			default:
 				goto CapacityLoop
 			}
