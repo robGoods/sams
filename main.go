@@ -77,9 +77,9 @@ func main() {
 		}
 	GoodsLoop:
 		fmt.Printf("########## 开始校验当前商品【%s】 ###########\n", time.Now().Format("15:04:05"))
-		time.Sleep(50 * time.Millisecond) //校验商品高峰经常失败， 保护一下服务端
 		if err = session.CheckGoods(); err != nil {
 			fmt.Println(err)
+			time.Sleep(1 * time.Second)
 			switch err {
 			case dd.OOSErr:
 				goto CartLoop
@@ -89,6 +89,7 @@ func main() {
 		}
 		if err = session.CheckSettleInfo(); err != nil {
 			fmt.Printf("校验商品失败：%s\n", err)
+			time.Sleep(1 * time.Second)
 			switch err {
 			case dd.CartGoodChangeErr:
 				goto CartLoop
@@ -158,10 +159,8 @@ func main() {
 			case dd.DecreaseCapacityCountError:
 				goto CapacityLoop
 			case dd.OOSErr:
-				fmt.Println("部分商品已缺货")
 				goto CartLoop
 			case dd.StoreHasClosedError:
-				fmt.Println("门店已打烊")
 				goto StoreLoop
 			default:
 				goto CapacityLoop
