@@ -94,7 +94,7 @@ func main() {
 			case dd.LimitedErr:
 				goto GoodsLoop
 			case dd.NoMatchDeliverMode:
-				goto GoodsLoop
+				goto SaveDeliveryAddress
 			default:
 				goto GoodsLoop
 			}
