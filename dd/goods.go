@@ -71,7 +71,6 @@ func (s *DingdongSession) CheckGoods() error {
 	}
 	data["goodsList"] = goods
 	dataStr, _ := json.Marshal(data)
-
 	req := s.NewRequest("POST", urlPath, dataStr)
 
 	resp, err := s.Client.Do(req)
@@ -91,10 +90,10 @@ func (s *DingdongSession) CheckGoods() error {
 			if result.Get("data.isHasException").Bool() == false {
 				return nil
 			} else {
-				fmt.Printf("========以下商品已过期====")
+				fmt.Println(result.Get("data.popUpInfo.desc").Str)
 				for index, v := range result.Get("data.popUpInfo.goodsList").Array() {
 					_, goods := parseNormalGoods(v)
-					fmt.Printf("[%v] %s 数量：%v 总价：%d\n", index, goods.SpuId, goods.StoreId, goods.Price)
+					fmt.Printf("[%v] %s 数量：%v 总价：%d\n", index, goods.GoodsName, goods.Quantity, goods.Price)
 				}
 				return OOSErr
 			}
