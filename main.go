@@ -120,6 +120,11 @@ func main() {
 					session.SettleDeliveryInfo.ExpectArrivalTime = v.StartRealTime
 					session.SettleDeliveryInfo.ExpectArrivalEndTime = v.EndRealTime
 					break
+				} else {
+					session.SettleDeliveryInfo.ArrivalTimeStr = fmt.Sprintf("%s %s - %s", caps.StrDate, v.StartTime, v.EndTime)
+					session.SettleDeliveryInfo.ExpectArrivalTime = v.StartRealTime
+					session.SettleDeliveryInfo.ExpectArrivalEndTime = ""
+					break
 				}
 			}
 		}
