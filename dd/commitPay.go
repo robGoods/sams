@@ -130,6 +130,10 @@ func (s *DingdongSession) CommitPay() error {
 			return CloseOrderTimeExceptionErr
 		case "DECREASE_CAPACITY_COUNT_ERROR":
 			return DecreaseCapacityCountError
+		case "OUT_OF_STOCK":
+			return OOSErr
+		case "STORE_HAS_CLOSED":
+			return StoreHasClosedError
 		default:
 			return errors.New(result.Get("msg").Str)
 		}
