@@ -148,6 +148,12 @@ func main() {
 				goto CapacityLoop
 			case dd.DecreaseCapacityCountError:
 				goto CapacityLoop
+			case dd.OOSErr:
+				fmt.Println("部分商品已缺货")
+				goto CartLoop
+			case dd.StoreHasClosedError:
+				fmt.Println("门店已打烊")
+				goto StoreLoop
 			default:
 				goto CapacityLoop
 			}
