@@ -1,6 +1,7 @@
 package dd
 
 import (
+	"encoding/json"
 	"errors"
 	"fmt"
 	"io/ioutil"
@@ -74,5 +75,42 @@ func (s *DingdongSession) GetAddress() (error, []Address) {
 		}
 	} else {
 		return errors.New(fmt.Sprintf("[%v] %s", resp.StatusCode, body)), nil
+	}
+}
+
+func (s *DingdongSession) SaveDeliveryAddress() error {
+	urlPath := "https://api-sams.walmartmobile.cn/api/v1/sams/trade/cart/saveDeliveryAddress"
+
+	data := make(map[string]interface{})
+	data["uid"] = ""
+	data["addressId"] = s.Address.AddressId
+	dataStr, _ := json.Marshal(data)
+
+	req := s.NewRequest("POST", urlPath, dataStr)
+
+	resp, err := s.Client.Do(req)
+	if err != nil {
+		return err
+	}
+	body, err := ioutil.ReadAll(resp.Body)
+	if err != nil {
+		return err
+	}
+	resp.Body.Close()
+	if resp.StatusCode == 200 {
+		result := gjson.Parse(string(body))
+		switch result.Get("code").Str {
+		case "Success":
+			if result.Get("data.result").Bool() {
+				return nil
+			}
+			return errors.New(result.Get("msg").Str)
+		case "AUTH_FAIL":
+			return errors.New(fmt.Sprintf("%s %s", result.Get("msg").Str, "token过期！！！"))
+		default:
+			return errors.New(result.Get("msg").Str)
+		}
+	} else {
+		return errors.New(fmt.Sprintf("[%v] %s", resp.StatusCode, body))
 	}
 }

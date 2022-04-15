@@ -28,6 +28,15 @@ func main() {
 	}
 
 	for true {
+	SaveDeliveryAddress:
+		fmt.Println("########## 切换购物车收货地址 ###########")
+		err = session.SaveDeliveryAddress()
+		if err != nil {
+			goto SaveDeliveryAddress
+		} else {
+			fmt.Println("切换成功!")
+			fmt.Printf("%s %s %s %s %s \n", session.Address.Name, session.Address.DistrictName, session.Address.ReceiverAddress, session.Address.DetailAddress, session.Address.Mobile)
+		}
 	StoreLoop:
 		fmt.Println("########## 获取地址附近可用商店 ###########")
 		err = session.CheckStore()
