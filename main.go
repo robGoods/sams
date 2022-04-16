@@ -14,10 +14,10 @@ func main() {
 		BarkId:       "",      //通知用的bark id，下载bark后从app界面获取, 如果不需要可以填空字符串
 		FloorId:      1,       //1,普通商品 2,全球购保税 3,特殊订购自提 4,大件商品 5,厂家直供商品 6,特殊订购商品 7,失效商品
 		DeliveryType: 2,       //1 急速达，2， 全程配送
-		Longitude:    "xxxxx", //HTTP头部longitude
-		Latitude:     "xxxxx", //HTTP头部latitude
-		Deviceid:     "xxxxx", //HTTP头部device-id
-		Trackinfo:    `xxxxx`, // HTTP头部track-info
+		Longitude:    "", //HTTP头部longitude,可选参数
+		Latitude:     "", //HTTP头部latitude,可选参数
+		Deviceid:     "", //HTTP头部device-id,可选参数
+		Trackinfo:    "", // HTTP头部track-info,可选参数
 	}
 
 	err := session.InitSession(conf)
