@@ -49,6 +49,10 @@ go run main.go
 
 ![run.png](https://robgoods.github.io/sams/assets/run.png)
 
+## 关于hack版本
+
+hack版本与master版本基本相同，有兴趣的朋友可以研究下哪些不同。会有惊喜的发现😯😯😯
+
 ## 声明
 本项目仅供学习交流，严禁用作商业行为，特别禁止黄牛加价代抢等！
 
