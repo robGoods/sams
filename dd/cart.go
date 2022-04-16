@@ -40,6 +40,12 @@ func parseFloorInfos(g gjson.Result) (error, FloorInfo) {
 		_, p := parseNormalGoods(normalGoods)
 		r.NormalGoodsList = append(r.NormalGoodsList, p)
 	}
+	for _, promotionGoodsList := range g.Get("promotionFloorGoodsList").Array() {
+		for _, promotionGoods := range promotionGoodsList.Get("promotionGoodsList").Array() {
+			_, p := parseNormalGoods(promotionGoods)
+			r.NormalGoodsList = append(r.NormalGoodsList, p)
+		}
+	}
 
 	return nil, r
 }
