@@ -12,15 +12,17 @@ import (
 )
 
 type Config struct {
-	AuthToken    string
-	BarkId       string
-	FloorId      int //1,普通商品 2,全球购保税 3,特殊订购自提 4,大件商品 5,厂家直供商品 6,特殊订购商品 7,失效商品
-	DeliveryType int //1 急速达，2， 全程配送
-	Longitude    string
-	Latitude     string
-	Deviceid     string
-	Trackinfo    string
-	PromotionId  string
+	AuthToken         string
+	BarkId            string
+	FloorId           int //1,普通商品 2,全球购保税 3,特殊订购自提 4,大件商品 5,厂家直供商品 6,特殊订购商品 7,失效商品
+	DeliveryType      int //1 急速达，2， 全程配送
+	Longitude         string
+	Latitude          string
+	Deviceid          string
+	Trackinfo         string
+	PromotionId       string
+	AddressIndex      int  //地址index
+	PayMethod         int  //支付方式
 }
 
 type DingdongSession struct {
@@ -53,40 +55,58 @@ func (s *DingdongSession) InitSession(conf Config) error {
 	if len(addrList) == 0 {
 		return errors.New("未查询到有效收货地址，请前往app添加或检查cookie是否正确！")
 	}
-	fmt.Println("########## 选择收货地址 ##########")
-	for i, addr := range addrList {
-		fmt.Printf("[%v] %s %s %s %s %s \n", i, addr.Name, addr.DistrictName, addr.ReceiverAddress, addr.DetailAddress, addr.Mobile)
-	}
 	var index int
-	for true {
-		fmt.Println("请输入地址序号（0, 1, 2...)：")
-		_, err := fmt.Fscanln(stdin, &index)
-		if err != nil {
-			fmt.Printf("输入有误：%s!\n", err)
-		} else if index >= len(addrList) {
-			fmt.Println("输入有误：超过最大序号！")
-		} else {
-			break
+	if s.Conf.AddressIndex == -1 {
+		fmt.Println("########## 选择收货地址 ##########")
+		for i, addr := range addrList {
+			fmt.Printf("[%v] %s %s %s %s %s \n", i, addr.Name, addr.DistrictName, addr.ReceiverAddress, addr.DetailAddress, addr.Mobile)
 		}
+		
+		for true {
+			fmt.Println("请输入地址序号（0, 1, 2...)：")
+			_, err := fmt.Fscanln(stdin, &index)
+			if err != nil {
+				fmt.Printf("输入有误：%s!\n", err)
+			} else if index >= len(addrList) {
+				fmt.Println("输入有误：超过最大序号！")
+			} else {
+				break
+			}
+		}
+		s.Address = addrList[index]
+	} else {
+		s.Address = addrList[s.Conf.AddressIndex]
+		fmt.Printf("收货地址 :  %s %s %s %s %s \n", s.Address.Name, s.Address.DistrictName, s.Address.ReceiverAddress, s.Address.DetailAddress, s.Address.Mobile)
 	}
-	s.Address = addrList[index]
+	
 
-	fmt.Println("########## 选择支付方式 ##########")
-	for true {
-		fmt.Println("请输入支付方式序号（0：微信 1：支付宝)：")
-		_, err := fmt.Fscanln(stdin, &index)
-		if err != nil {
-			fmt.Printf("输入有误：%s!\n", err)
-		} else if index == 0 {
-			s.Channel = "wechat"
-			break
-		} else if index == 1 {
-			s.Channel = "alipay"
-			break
-		} else {
-			fmt.Println("输入有误：序号无效！")
+	if s.Conf.PayMethod == -1 {
+		fmt.Println("########## 选择支付方式 ##########")
+		for true {
+			fmt.Println("请输入支付方式序号（0：微信 1：支付宝)：")
+			_, err := fmt.Fscanln(stdin, &index)
+			if err != nil {
+				fmt.Printf("输入有误：%s!\n", err)
+			} else if index == 0 {
+				s.Channel = "wechat"
+				break
+			} else if index == 1 {
+				s.Channel = "alipay"
+				break
+			} else {
+				fmt.Println("输入有误：序号无效！")
+			}
 		}
+	} else if s.Conf.PayMethod == 0 {
+		fmt.Println("支付方式 : wechat ")
+		s.Channel = "wechat"
+	} else if s.Conf.PayMethod == 1 {
+		fmt.Println("支付方式 : alipay ")
+		s.Channel = "alipay"
+	} else {
+		fmt.Println("输入有误：序号无效！")
 	}
+
 	return nil
 }
 
