@@ -79,7 +79,7 @@ func (s *DingdongSession) CommitPay() error {
 		InvoiceInfo:        make(map[int]interface{}),
 		DeliveryType:       s.Conf.DeliveryType, // 1,急速到达 2,全城配送
 		FloorId:            0,                   //急速时选1
-		Amount:             "13123",             //测试没用但必须有
+		Amount:             s.FloorInfo.Amount,             //测试没用但必须有
 		PurchaserName:      "",
 		SettleDeliveryInfo: s.SettleDeliveryInfo,
 		TradeType:          "APP",

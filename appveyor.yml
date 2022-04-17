@@ -1,0 +1,14 @@
+image: Ubuntu
+
+clone_folder: /usr/go/src/github.com/robGoods/sams
+
+environment:
+  GOPATH: /usr/go/
+
+stack: go 1.15
+
+#before_test:
+#  - go vet ./...
+
+test_script:
+  - go build
