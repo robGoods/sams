@@ -42,6 +42,10 @@ Usage of ./sams:
     	可选，HTTP头部track-info
   -promotionId string
       可选，优惠券id
+  -addressIndex
+      可选，默认地址index，跳过输入地址
+  -payMethod
+      可选，0,微信 1,支付宝，跳过输入支付方式
 ```
 
 ### BarkId
