@@ -12,17 +12,17 @@ import (
 )
 
 type Config struct {
-	AuthToken         string
-	BarkId            string
-	FloorId           int //1,普通商品 2,全球购保税 3,特殊订购自提 4,大件商品 5,厂家直供商品 6,特殊订购商品 7,失效商品
-	DeliveryType      int //1 急速达，2， 全程配送
-	Longitude         string
-	Latitude          string
-	Deviceid          string
-	Trackinfo         string
-	PromotionId       string
-	AddressIndex      int  //地址index
-	PayMethod         int  //支付方式
+	AuthToken    string
+	BarkId       string
+	FloorId      int //1,普通商品 2,全球购保税 3,特殊订购自提 4,大件商品 5,厂家直供商品 6,特殊订购商品 7,失效商品
+	DeliveryType int //1 急速达，2， 全程配送
+	Longitude    string
+	Latitude     string
+	Deviceid     string
+	Trackinfo    string
+	PromotionId  string
+	AddressIndex int  //地址index
+	PayMethod    int  //支付方式
 }
 
 type DingdongSession struct {
