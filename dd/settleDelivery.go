@@ -102,7 +102,7 @@ type SettleParam struct {
 
 func (s *DingdongSession) CheckSettleInfo() error {
 	urlPath := "https://api-sams.walmartmobile.cn/api/v1/sams/trade/settlement/getSettleInfo"
-	
+
 	data := SettleParam{
 		Uid:            s.Uid,
 		AddressId:      s.Address.AddressId,
@@ -115,7 +115,7 @@ func (s *DingdongSession) CheckSettleInfo() error {
 		GoodsList:      s.GoodsList,
 	}
 	if s.Conf.PromotionId != "" {
-		data.CouponList = append(data.CouponList, CouponInfo{ PromotionId: s.Conf.PromotionId, StoreId: s.FloorInfo.StoreInfo.StoreId })	
+		data.CouponList = append(data.CouponList, CouponInfo{PromotionId: s.Conf.PromotionId, StoreId: s.FloorInfo.StoreInfo.StoreId})
 	}
 	dataStr, _ := json.Marshal(data)
 	req := s.NewRequest("POST", urlPath, dataStr)
