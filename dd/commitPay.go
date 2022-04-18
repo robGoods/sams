@@ -25,7 +25,7 @@ type CommitPayPram struct {
 	ShortageId         int                 `json:"shortageId"`   //1
 	IsSelfPickup       int                 `json:"isSelfPickup"` //0
 	OrderType          int                 `json:"orderType"`    //0
-	CouponList         []CouponInfo        `json:"couponList"`
+	CouponList         []CouponInfo        `json:"couponList,omitempty"`
 	Uid                string              `json:"uid"`   //273583094,
 	AppId              string              `json:"appId"` //wx57364320cb03dfba
 	AddressId          string              `json:"addressId"`
@@ -79,7 +79,7 @@ func (s *DingdongSession) CommitPay() error {
 		GoodsList:          s.GoodsList,
 		InvoiceInfo:        make(map[int]interface{}),
 		DeliveryType:       s.Conf.DeliveryType, // 1,急速到达 2,全城配送
-		FloorId:            0,                   //急速时选1
+		FloorId:            s.SettleInfo.FloorId,                   //急速时选1
 		Amount:             s.FloorInfo.Amount,  //测试没用但必须有
 		PurchaserName:      "",
 		SettleDeliveryInfo: s.SettleDeliveryInfo,
@@ -92,7 +92,7 @@ func (s *DingdongSession) CommitPay() error {
 		IsSelfPickup:       0,
 		OrderType:          0,
 		CouponList:         make([]CouponInfo, 0),
-		Uid:                "213123", //s.Uid,
+		Uid:                s.SettleInfo.Uid, //s.Uid,
 		AppId:              fmt.Sprintf("wx51394321bc03adfadf"),
 		AddressId:          s.Address.AddressId,
 		DeliveryInfoVO:     s.DeliveryInfoVO,
@@ -107,6 +107,8 @@ func (s *DingdongSession) CommitPay() error {
 	}
 
 	dataStr, err := json.Marshal(data)
+	fmt.Printf("commit pay : %s", dataStr)
+	return StoreHasClosedError
 	if err != nil {
 		return err
 	}
