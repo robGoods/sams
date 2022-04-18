@@ -103,7 +103,7 @@ func (s *DingdongSession) CommitPay() error {
 	}
 
 	if s.Conf.PromotionId != "" {
-		data.CouponList = append(data.CouponList, CouponInfo{ PromotionId: s.Conf.PromotionId, StoreId: s.FloorInfo.StoreInfo.StoreId })
+		data.CouponList = append(data.CouponList, CouponInfo{PromotionId: s.Conf.PromotionId, StoreId: s.FloorInfo.StoreInfo.StoreId})
 	}
 
 	dataStr, err := json.Marshal(data)
