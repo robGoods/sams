@@ -98,22 +98,6 @@ func (s *DingdongSession) InitSession(conf Config) error {
 			fmt.Println("输入有误：序号无效！")
 		}
 	}
-	fmt.Println("########## 当前选择优惠券 ##########")
-	for true {
-		fmt.Println("请输入支付方式序号（0：微信 1：支付宝)：")
-		_, err := fmt.Fscanln(stdin, &index)
-		if err != nil {
-			fmt.Printf("输入有误：%s!\n", err)
-		} else if index == 0 {
-			s.Channel = "wechat"
-			break
-		} else if index == 1 {
-			s.Channel = "alipay"
-			break
-		} else {
-			fmt.Println("输入有误：序号无效！")
-		}
-	}
 	return nil
 }
 
