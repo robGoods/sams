@@ -20,6 +20,7 @@ type Config struct {
 	Latitude     string
 	Deviceid     string
 	Trackinfo    string
+	PromotionId  string
 }
 
 type DingdongSession struct {

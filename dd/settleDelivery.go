@@ -84,14 +84,17 @@ type DeliveryInfoVO struct {
 	DeliveryModeId          string `json:"deliveryModeId"`
 	StoreType               string `json:"storeType"`
 }
-
+type CouponInfo struct {
+	PromotionId string `json:"promotionId"`
+	StoreId     string `json:"storeId"`
+}
 type SettleParam struct {
 	Uid            string         `json:"uid"`
 	AddressId      string         `json:"addressId"`
 	DeliveryInfoVO DeliveryInfoVO `json:"deliveryInfoVO"`
 	DeliveryType   int            `json:"cartDeliveryType"`
 	StoreInfo      StoreInfo      `json:"storeInfo"`
-	CouponList     []string       `json:"couponList"`
+	CouponList     []CouponInfo   `json:"couponList"`
 	IsSelfPickup   int            `json:"isSelfPickup"`
 	FloorId        int            `json:"floorId"`
 	GoodsList      []Goods        `json:"goodsList"`
@@ -99,21 +102,22 @@ type SettleParam struct {
 
 func (s *DingdongSession) CheckSettleInfo() error {
 	urlPath := "https://api-sams.walmartmobile.cn/api/v1/sams/trade/settlement/getSettleInfo"
-
+	
 	data := SettleParam{
 		Uid:            s.Uid,
 		AddressId:      s.Address.AddressId,
 		DeliveryInfoVO: s.DeliveryInfoVO,
 		DeliveryType:   s.Conf.DeliveryType,
 		StoreInfo:      s.FloorInfo.StoreInfo,
-		CouponList:     make([]string, 0),
+		CouponList:     make([]CouponInfo, 0),
 		IsSelfPickup:   0,
 		FloorId:        s.Conf.FloorId,
 		GoodsList:      s.GoodsList,
 	}
-
+	if s.Conf.PromotionId != "" {
+		data.CouponList = append(data.CouponList, CouponInfo{ PromotionId: s.Conf.PromotionId, StoreId: s.FloorInfo.StoreInfo.StoreId })	
+	}
 	dataStr, _ := json.Marshal(data)
-
 	req := s.NewRequest("POST", urlPath, dataStr)
 
 	resp, err := s.Client.Do(req)

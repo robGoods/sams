@@ -18,6 +18,7 @@ var (
 	latitude     = flag.String("latitude", "", "可选，HTTP头部latitude")
 	deviceId     = flag.String("deviceId", "", "可选，HTTP头部device-id")
 	trackInfo    = flag.String("trackInfo", "", "可选，HTTP头部track-info")
+	promotionId  = flag.String("promotionId", "", "可选，优惠券id")
 )
 
 func main() {
@@ -41,7 +42,8 @@ func main() {
 		Longitude:    *longitude,    //HTTP头部longitude,可选参数
 		Latitude:     *latitude,     //HTTP头部latitude,可选参数
 		Deviceid:     *deviceId,     //HTTP头部device-id,可选参数
-		Trackinfo:    *trackInfo,    // HTTP头部track-info,可选参数
+		Trackinfo:    *trackInfo,    //HTTP头部track-info,可选参数
+		PromotionId:  *promotionId,  //优惠券id
 	}
 
 	err := session.InitSession(conf)

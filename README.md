@@ -40,6 +40,8 @@ Usage of ./sams:
     	可选，HTTP头部longitude
   -trackInfo string
     	可选，HTTP头部track-info
+  -promotionId string
+      可选，优惠券id
 ```
 
 ### BarkId
