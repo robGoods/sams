@@ -107,8 +107,6 @@ func (s *DingdongSession) CommitPay() error {
 	}
 
 	dataStr, err := json.Marshal(data)
-	fmt.Printf("commit pay : %s", dataStr)
-	return StoreHasClosedError
 	if err != nil {
 		return err
 	}
