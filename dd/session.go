@@ -8,7 +8,6 @@ import (
 	"io"
 	"net/http"
 	"os"
-	"strings"
 	"time"
 )
 
@@ -21,7 +20,7 @@ type Config struct {
 	Latitude     string
 	Deviceid     string
 	Trackinfo    string
-	PromotionId  string
+	PromotionId  []string
 }
 
 type DingdongSession struct {
@@ -46,10 +45,9 @@ func (s *DingdongSession) InitSession(conf Config) error {
 	s.Client = &http.Client{Timeout: 60 * time.Second}
 	s.Conf = conf
 
-	if s.Conf.PromotionId != "" {
+	if len(s.Conf.PromotionId) > 0 {
 		fmt.Println("########## 当前选择优惠券 ##########")
-		promotionIdList := strings.Split(s.Conf.PromotionId, `,`)
-		for _, id := range promotionIdList {
+		for _, id := range s.Conf.PromotionId {
 			fmt.Println(id)
 		}
 	} else {

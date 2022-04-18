@@ -4,10 +4,8 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
-	"io/ioutil"
-	"strings"
-
 	"github.com/tidwall/gjson"
+	"io/ioutil"
 )
 
 type CommitPayPram struct {
@@ -103,9 +101,8 @@ func (s *DingdongSession) CommitPay() error {
 		PayMethodId:        "1486659732",
 	}
 
-	if s.Conf.PromotionId != "" {
-		promotionIdList := strings.Split(s.Conf.PromotionId, `,`)
-		for _, id := range promotionIdList {
+	if len(s.Conf.PromotionId) > 0 {
+		for _, id := range s.Conf.PromotionId {
 			data.CouponList = append(data.CouponList, CouponInfo{PromotionId: id, StoreId: s.FloorInfo.StoreInfo.StoreId})
 		}
 	}

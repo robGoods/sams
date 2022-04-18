@@ -4,10 +4,8 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
-	"io/ioutil"
-	"strings"
-
 	"github.com/tidwall/gjson"
+	"io/ioutil"
 )
 
 type SettleDelivery struct {
@@ -116,9 +114,8 @@ func (s *DingdongSession) CheckSettleInfo() error {
 		GoodsList:      s.GoodsList,
 	}
 
-	if s.Conf.PromotionId != "" {
-		promotionIdList := strings.Split(s.Conf.PromotionId, `,`)
-		for _, id := range promotionIdList {
+	if len(s.Conf.PromotionId) > 0 {
+		for _, id := range s.Conf.PromotionId {
 			data.CouponList = append(data.CouponList, CouponInfo{PromotionId: id, StoreId: s.FloorInfo.StoreInfo.StoreId})
 		}
 	}
