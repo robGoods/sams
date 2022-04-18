@@ -25,8 +25,9 @@ type CommitPayPram struct {
 	ShortageId         int                 `json:"shortageId"`   //1
 	IsSelfPickup       int                 `json:"isSelfPickup"` //0
 	OrderType          int                 `json:"orderType"`    //0
-	Uid                string              `json:"uid"`          //273583094,
-	AppId              string              `json:"appId"`        //wx57364320cb03dfba
+	CouponList         []CouponInfo        `json:"couponList"`
+	Uid                string              `json:"uid"`   //273583094,
+	AppId              string              `json:"appId"` //wx57364320cb03dfba
 	AddressId          string              `json:"addressId"`
 	DeliveryInfoVO     DeliveryInfoVO      `json:"deliveryInfoVO"`
 	Remark             string              `json:"remark"`
@@ -79,7 +80,7 @@ func (s *DingdongSession) CommitPay() error {
 		InvoiceInfo:        make(map[int]interface{}),
 		DeliveryType:       s.Conf.DeliveryType, // 1,急速到达 2,全城配送
 		FloorId:            0,                   //急速时选1
-		Amount:             s.FloorInfo.Amount,             //测试没用但必须有
+		Amount:             s.FloorInfo.Amount,  //测试没用但必须有
 		PurchaserName:      "",
 		SettleDeliveryInfo: s.SettleDeliveryInfo,
 		TradeType:          "APP",
@@ -90,6 +91,7 @@ func (s *DingdongSession) CommitPay() error {
 		ShortageId:         1,
 		IsSelfPickup:       0,
 		OrderType:          0,
+		CouponList:         make([]CouponInfo, 0),
 		Uid:                "213123", //s.Uid,
 		AppId:              fmt.Sprintf("wx51394321bc03adfadf"),
 		AddressId:          s.Address.AddressId,
@@ -98,6 +100,10 @@ func (s *DingdongSession) CommitPay() error {
 		StoreInfo:          s.FloorInfo.StoreInfo,
 		ShortageDesc:       "其他商品继续配送（缺货商品直接退款）",
 		PayMethodId:        "1486659732",
+	}
+
+	if s.Conf.PromotionId != "" {
+		data.CouponList = append(data.CouponList, CouponInfo{ PromotionId: s.Conf.PromotionId, StoreId: s.FloorInfo.StoreInfo.StoreId })
 	}
 
 	dataStr, err := json.Marshal(data)
