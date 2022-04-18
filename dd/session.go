@@ -20,9 +20,10 @@ type Config struct {
 	Latitude     string
 	Deviceid     string
 	Trackinfo    string
-	PromotionId  string
-	AddressIndex int  //地址index
+	PromotionId  []string
+  AddressIndex int  //地址index
 	PayMethod    int  //支付方式
+
 }
 
 type DingdongSession struct {
@@ -46,6 +47,15 @@ func (s *DingdongSession) InitSession(conf Config) error {
 	fmt.Println("########## 初始化 ##########")
 	s.Client = &http.Client{Timeout: 60 * time.Second}
 	s.Conf = conf
+
+	if len(s.Conf.PromotionId) > 0 {
+		fmt.Println("########## 当前选择优惠券 ##########")
+		for _, id := range s.Conf.PromotionId {
+			fmt.Println(id)
+		}
+	} else {
+		fmt.Println("########## 当前没有选择优惠券 ##########")
+	}
 	stdin := bufio.NewReader(os.Stdin)
 
 	err, addrList := s.GetAddress()

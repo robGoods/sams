@@ -3,6 +3,7 @@ package main
 import (
 	"flag"
 	"fmt"
+	"strings"
 	"time"
 
 	"github.com/robGoods/sams/dd"
@@ -18,7 +19,7 @@ var (
 	latitude     = flag.String("latitude", "", "可选，HTTP头部latitude")
 	deviceId     = flag.String("deviceId", "", "可选，HTTP头部device-id")
 	trackInfo    = flag.String("trackInfo", "", "可选，HTTP头部track-info")
-	promotionId  = flag.String("promotionId", "", "可选，优惠券id")
+	promotionId  = flag.String("promotionId", "", "可选，优惠券id,多个用逗号隔开")
 	addressIndex = flag.Int("addressIndex", -1, "可选，默认地址index，跳过输入地址")
 	payMethod    = flag.Int("payMethod", -1, "可选，0,微信 1,支付宝，跳过输入支付方式")
 )
@@ -35,17 +36,21 @@ func main() {
 		return
 	}
 
+	splitFn := func(c rune) bool {
+		return c == ','
+	}
+
 	session := dd.DingdongSession{}
 	conf := dd.Config{
-		AuthToken:    *authToken,    //HTTP头部auth-token
-		BarkId:       *barkId,       //通知用的bark id，下载bark后从app界面获取, 如果不需要可以填空字符串
-		FloorId:      *floorId,      //1,普通商品 2,全球购保税 3,特殊订购自提 4,大件商品 5,厂家直供商品 6,特殊订购商品 7,失效商品
-		DeliveryType: *deliveryType, //1 急速达，2， 全程配送
-		Longitude:    *longitude,    //HTTP头部longitude,可选参数
-		Latitude:     *latitude,     //HTTP头部latitude,可选参数
-		Deviceid:     *deviceId,     //HTTP头部device-id,可选参数
-		Trackinfo:    *trackInfo,    //HTTP头部track-info,可选参数
-		PromotionId:  *promotionId,  //优惠券id
+		AuthToken:    *authToken,                                //HTTP头部auth-token
+		BarkId:       *barkId,                                   //通知用的bark id，下载bark后从app界面获取, 如果不需要可以填空字符串
+		FloorId:      *floorId,                                  //1,普通商品 2,全球购保税 3,特殊订购自提 4,大件商品 5,厂家直供商品 6,特殊订购商品 7,失效商品
+		DeliveryType: *deliveryType,                             //1 急速达，2， 全程配送
+		Longitude:    *longitude,                                //HTTP头部longitude,可选参数
+		Latitude:     *latitude,                                 //HTTP头部latitude,可选参数
+		Deviceid:     *deviceId,                                 //HTTP头部device-id,可选参数
+		Trackinfo:    *trackInfo,                                //HTTP头部track-info,可选参数
+		PromotionId:  strings.FieldsFunc(*promotionId, splitFn), //优惠券id
 		AddressIndex: *addressIndex, //默认地址index
 		PayMethod:    *payMethod,    //支付方式
 	}
