@@ -8,6 +8,7 @@ import (
 	"io"
 	"net/http"
 	"os"
+	"strings"
 	"time"
 )
 
@@ -44,6 +45,16 @@ func (s *DingdongSession) InitSession(conf Config) error {
 	fmt.Println("########## 初始化 ##########")
 	s.Client = &http.Client{Timeout: 60 * time.Second}
 	s.Conf = conf
+
+	if s.Conf.PromotionId != "" {
+		fmt.Println("########## 当前选择优惠券 ##########")
+		promotionIdList := strings.Split(s.Conf.PromotionId, `,`)
+		for _, id := range promotionIdList {
+			fmt.Println(id)
+		}
+	} else {
+		fmt.Println("########## 当前没有选择优惠券 ##########")
+	}
 	stdin := bufio.NewReader(os.Stdin)
 
 	err, addrList := s.GetAddress()

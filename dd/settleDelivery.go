@@ -5,6 +5,7 @@ import (
 	"errors"
 	"fmt"
 	"io/ioutil"
+	"strings"
 
 	"github.com/tidwall/gjson"
 )
@@ -114,8 +115,12 @@ func (s *DingdongSession) CheckSettleInfo() error {
 		FloorId:        s.Conf.FloorId,
 		GoodsList:      s.GoodsList,
 	}
+
 	if s.Conf.PromotionId != "" {
-		data.CouponList = append(data.CouponList, CouponInfo{PromotionId: s.Conf.PromotionId, StoreId: s.FloorInfo.StoreInfo.StoreId})
+		promotionIdList := strings.Split(s.Conf.PromotionId, `,`)
+		for _, id := range promotionIdList {
+			data.CouponList = append(data.CouponList, CouponInfo{PromotionId: id, StoreId: s.FloorInfo.StoreInfo.StoreId})
+		}
 	}
 	dataStr, _ := json.Marshal(data)
 	req := s.NewRequest("POST", urlPath, dataStr)
