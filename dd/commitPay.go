@@ -5,6 +5,7 @@ import (
 	"errors"
 	"fmt"
 	"io/ioutil"
+	"strings"
 
 	"github.com/tidwall/gjson"
 )
@@ -103,7 +104,10 @@ func (s *DingdongSession) CommitPay() error {
 	}
 
 	if s.Conf.PromotionId != "" {
-		data.CouponList = append(data.CouponList, CouponInfo{PromotionId: s.Conf.PromotionId, StoreId: s.FloorInfo.StoreInfo.StoreId})
+		promotionIdList := strings.Split(s.Conf.PromotionId, `,`)
+		for _, id := range promotionIdList {
+			data.CouponList = append(data.CouponList, CouponInfo{PromotionId: id, StoreId: s.FloorInfo.StoreInfo.StoreId})
+		}
 	}
 
 	dataStr, err := json.Marshal(data)

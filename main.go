@@ -18,7 +18,7 @@ var (
 	latitude     = flag.String("latitude", "", "可选，HTTP头部latitude")
 	deviceId     = flag.String("deviceId", "", "可选，HTTP头部device-id")
 	trackInfo    = flag.String("trackInfo", "", "可选，HTTP头部track-info")
-	promotionId  = flag.String("promotionId", "", "可选，优惠券id")
+	promotionId  = flag.String("promotionId", "", "可选，优惠券id,多个用逗号隔开")
 )
 
 func main() {
