@@ -20,8 +20,8 @@ var (
 	deviceId     = flag.String("deviceId", "", "可选，HTTP头部device-id")
 	trackInfo    = flag.String("trackInfo", "", "可选，HTTP头部track-info")
 	promotionId  = flag.String("promotionId", "", "可选，优惠券id,多个用逗号隔开")
-	addressIndex = flag.Int("addressIndex", -1, "可选，默认地址index，跳过输入地址")
-	payMethod    = flag.Int("payMethod", -1, "可选，0,微信 1,支付宝，跳过输入支付方式")
+	addressId    = flag.String("addressId", "", "可选，地址id")
+	payMethod    = flag.Int("payMethod", 0, "可选，0,微信 1,支付宝")
 )
 
 func main() {
@@ -51,8 +51,8 @@ func main() {
 		Deviceid:     *deviceId,                                 //HTTP头部device-id,可选参数
 		Trackinfo:    *trackInfo,                                //HTTP头部track-info,可选参数
 		PromotionId:  strings.FieldsFunc(*promotionId, splitFn), //优惠券id
-		AddressIndex: *addressIndex, //默认地址index
-		PayMethod:    *payMethod,    //支付方式
+		AddressId:    *addressId,                                //地址
+		PayMethod:    *payMethod,                                //支付方式
 	}
 
 	err := session.InitSession(conf)

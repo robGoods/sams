@@ -21,9 +21,8 @@ type Config struct {
 	Deviceid     string
 	Trackinfo    string
 	PromotionId  []string
-  AddressIndex int  //地址index
-	PayMethod    int  //支付方式
-
+	AddressId    string
+	PayMethod    int //支付方式
 }
 
 type DingdongSession struct {
@@ -66,12 +65,12 @@ func (s *DingdongSession) InitSession(conf Config) error {
 		return errors.New("未查询到有效收货地址，请前往app添加或检查cookie是否正确！")
 	}
 	var index int
-	if s.Conf.AddressIndex == -1 {
+	if s.Conf.AddressId == "" {
 		fmt.Println("########## 选择收货地址 ##########")
 		for i, addr := range addrList {
 			fmt.Printf("[%v] %s %s %s %s %s \n", i, addr.Name, addr.DistrictName, addr.ReceiverAddress, addr.DetailAddress, addr.Mobile)
 		}
-		
+
 		for true {
 			fmt.Println("请输入地址序号（0, 1, 2...)：")
 			_, err := fmt.Fscanln(stdin, &index)
@@ -85,36 +84,24 @@ func (s *DingdongSession) InitSession(conf Config) error {
 		}
 		s.Address = addrList[index]
 	} else {
-		s.Address = addrList[s.Conf.AddressIndex]
-		fmt.Printf("收货地址 :  %s %s %s %s %s \n", s.Address.Name, s.Address.DistrictName, s.Address.ReceiverAddress, s.Address.DetailAddress, s.Address.Mobile)
-	}
-	
-
-	if s.Conf.PayMethod == -1 {
-		fmt.Println("########## 选择支付方式 ##########")
-		for true {
-			fmt.Println("请输入支付方式序号（0：微信 1：支付宝)：")
-			_, err := fmt.Fscanln(stdin, &index)
-			if err != nil {
-				fmt.Printf("输入有误：%s!\n", err)
-			} else if index == 0 {
-				s.Channel = "wechat"
-				break
-			} else if index == 1 {
-				s.Channel = "alipay"
-				break
-			} else {
-				fmt.Println("输入有误：序号无效！")
+		for _, v := range addrList {
+			if v.AddressId == s.Conf.AddressId {
+				s.Address = v
+				fmt.Printf("收货地址 :  %s %s %s %s %s \n", s.Address.Name, s.Address.DistrictName, s.Address.ReceiverAddress, s.Address.DetailAddress, s.Address.Mobile)
 			}
 		}
-	} else if s.Conf.PayMethod == 0 {
+	}
+
+	fmt.Println("########## 选择支付方式 ##########")
+	switch s.Conf.PayMethod {
+	case 0:
 		fmt.Println("支付方式 : wechat ")
 		s.Channel = "wechat"
-	} else if s.Conf.PayMethod == 1 {
+	case 1:
 		fmt.Println("支付方式 : alipay ")
 		s.Channel = "alipay"
-	} else {
-		fmt.Println("输入有误：序号无效！")
+	default:
+		return errors.New("选择支付方式有误！")
 	}
 
 	return nil
