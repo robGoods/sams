@@ -49,8 +49,8 @@ func (s *DingdongSession) InitSession(conf Config) error {
 
 	if len(s.Conf.PromotionId) > 0 {
 		fmt.Println("########## 当前选择优惠券 ##########")
-		for _, id := range s.Conf.PromotionId {
-			fmt.Println(id)
+		for k, id := range s.Conf.PromotionId {
+			fmt.Printf("[%d] %s\n", k, id)
 		}
 	} else {
 		fmt.Println("########## 当前没有选择优惠券 ##########")
