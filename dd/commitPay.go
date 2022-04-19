@@ -78,8 +78,8 @@ func (s *DingdongSession) CommitPay() error {
 		GoodsList:          s.GoodsList,
 		InvoiceInfo:        make(map[int]interface{}),
 		DeliveryType:       s.Conf.DeliveryType, // 1,急速到达 2,全城配送
-		FloorId:            s.SettleInfo.FloorId,                   //急速时选1
-		Amount:             s.FloorInfo.Amount,  //测试没用但必须有
+		FloorId:            s.SettleInfo.FloorId,
+		Amount:             s.FloorInfo.Amount,
 		PurchaserName:      "",
 		SettleDeliveryInfo: s.SettleDeliveryInfo,
 		TradeType:          "APP",
@@ -143,6 +143,8 @@ func (s *DingdongSession) CommitPay() error {
 			return NotDeliverCapCityErr
 		case "STORE_HAS_CLOSED":
 			return StoreHasClosedError
+		case "PRE_GOOD_NOT_START_SELL":
+			return PreGoodNotStartSellErr
 		default:
 			return errors.New(result.Get("msg").Str)
 		}

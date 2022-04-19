@@ -191,7 +191,7 @@ func main() {
 				goto OrderLoop
 			case dd.CloseOrderTimeExceptionErr, dd.DecreaseCapacityCountError, dd.NotDeliverCapCityErr:
 				goto CapacityLoop
-			case dd.OOSErr:
+			case dd.OOSErr, dd.PreGoodNotStartSellErr:
 				goto CartLoop
 			case dd.StoreHasClosedError:
 				goto StoreLoop

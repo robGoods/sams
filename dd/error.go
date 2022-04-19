@@ -10,5 +10,6 @@ var CloseOrderTimeExceptionErr = errors.New("尊敬的会员，您选择的配�
 var NotDeliverCapCityErr = errors.New("当前配送时间段已约满，请重新选择配送时段")
 var DecreaseCapacityCountError = errors.New("扣减运力失败")
 var StoreHasClosedError = errors.New("门店已打烊")
+var PreGoodNotStartSellErr = errors.New("商品还未开始正式售卖，无法购买")
 
 var OOSErr = errors.New("部分商品已缺货")
