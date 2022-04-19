@@ -38,14 +38,14 @@ Usage of ./sams:
     	可选，HTTP头部latitude
   -longitude string
     	可选，HTTP头部longitude
+  -payMethod int
+    	可选，1,微信 2,支付宝 (default 1)
+  -promotionId ruleId
+    	可选，优惠券id,多个用逗号隔开，山姆app优惠券列表接口中的'ruleId'字段
+  -addressId string
+    	可选，地址id
   -trackInfo string
     	可选，HTTP头部track-info
-  -promotionId string
-      可选，优惠券id
-  -addressIndex
-      可选，默认地址index，跳过输入地址
-  -payMethod
-      可选，0,微信 1,支付宝，跳过输入支付方式
 ```
 
 ### BarkId
@@ -55,10 +55,6 @@ Usage of ./sams:
 开始运行后按命令行提示操作即可。
 
 ![run.png](https://robgoods.github.io/sams/assets/run.png)
-
-## 关于hack版本
-
-hack版本与master版本基本相同，有兴趣的朋友可以研究下哪些不同。会有惊喜的发现😯😯😯
 
 ## 声明
 本项目仅供学习交流，严禁用作商业行为，特别禁止黄牛加价代抢等！
