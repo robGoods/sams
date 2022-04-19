@@ -16,6 +16,11 @@ go run main.go --authToken=xxxxx
 
 > 如果没有go环境，可以在 [releases](https://github.com/robGoods/sams/releases) 下载编译好的文件，直接运行即可
 
+### 更新说明
+
+1. 支付方式，收货地址均支持`flag`模式选择，而非`Stdin`模式，默认微信支付，地址未指定时依旧会提示选择
+1. 优惠券支持多张同时使用，使用前最好确认下订单是否满足使用类型
+
 #### 参数说明
 
 ```sh
