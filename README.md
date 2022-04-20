@@ -6,7 +6,9 @@
 
 ## 感谢
 
-首先感谢Sam's在上海疫情期间，给我们的帮助，让我们在疫情期间依旧可以买到很多好的东西！
+1. 感谢Sam's在上海疫情期间，给我们的帮助，让我们在疫情期间依旧可以买到很多好的东西！，购买Sam's会员请前往[山姆会员商店](https://www.samsclub.cn/)
+1. 感谢各位朋友对该项目的支持和star。
+1. 感谢 [gyf19](https://github.com/gyf19), [Matata-lol](https://github.com/Matata-lol), [3096](https://github.com/3096), [Nicolerobinn](https://github.com/Nicolerobinn), [likang7](https://github.com/likang7), [zyr3536](https://github.com/zyr3536)  对本项目的贡献
 
 ## 使用方式
 
@@ -15,6 +17,11 @@ go run main.go --authToken=xxxxx
 ```
 
 > 如果没有go环境，可以在 [releases](https://github.com/robGoods/sams/releases) 下载编译好的文件，直接运行即可
+
+### 更新说明
+
+1. 支付方式，收货地址均支持`flag`模式选择，而非`Stdin`模式，默认微信支付，地址未指定时依旧会提示选择
+1. 优惠券支持多张同时使用，使用前最好确认下订单是否满足使用类型
 
 #### 参数说明
 
@@ -38,14 +45,14 @@ Usage of ./sams:
     	可选，HTTP头部latitude
   -longitude string
     	可选，HTTP头部longitude
+  -payMethod int
+    	可选，1,微信 2,支付宝 (default 1)
+  -promotionId ruleId
+    	可选，优惠券id,多个用逗号隔开，山姆app优惠券列表接口中的'ruleId'字段
+  -addressId string
+    	可选，地址id
   -trackInfo string
     	可选，HTTP头部track-info
-  -promotionId string
-      可选，优惠券id
-  -addressIndex
-      可选，默认地址index，跳过输入地址
-  -payMethod
-      可选，0,微信 1,支付宝，跳过输入支付方式
 ```
 
 ### BarkId
@@ -55,10 +62,6 @@ Usage of ./sams:
 开始运行后按命令行提示操作即可。
 
 ![run.png](https://robgoods.github.io/sams/assets/run.png)
-
-## 关于hack版本
-
-hack版本与master版本基本相同，有兴趣的朋友可以研究下哪些不同。会有惊喜的发现😯😯😯
 
 ## 声明
 本项目仅供学习交流，严禁用作商业行为，特别禁止黄牛加价代抢等！

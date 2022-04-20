@@ -19,9 +19,9 @@ var (
 	latitude     = flag.String("latitude", "", "可选，HTTP头部latitude")
 	deviceId     = flag.String("deviceId", "", "可选，HTTP头部device-id")
 	trackInfo    = flag.String("trackInfo", "", "可选，HTTP头部track-info")
-	promotionId  = flag.String("promotionId", "", "可选，优惠券id,多个用逗号隔开")
+	promotionId  = flag.String("promotionId", "", "可选，优惠券id,多个用逗号隔开，山姆app优惠券列表接口中的'ruleId'字段")
 	addressId    = flag.String("addressId", "", "可选，地址id")
-	payMethod    = flag.Int("payMethod", 0, "可选，0,微信 1,支付宝")
+	payMethod    = flag.Int("payMethod", 1, "可选，1,微信 2,支付宝")
 )
 
 func main() {
@@ -191,7 +191,7 @@ func main() {
 				goto OrderLoop
 			case dd.CloseOrderTimeExceptionErr, dd.DecreaseCapacityCountError, dd.NotDeliverCapCityErr:
 				goto CapacityLoop
-			case dd.OOSErr:
+			case dd.OOSErr, dd.PreGoodNotStartSellErr:
 				goto CartLoop
 			case dd.StoreHasClosedError:
 				goto StoreLoop

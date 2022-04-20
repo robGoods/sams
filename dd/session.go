@@ -94,10 +94,10 @@ func (s *DingdongSession) InitSession(conf Config) error {
 
 	fmt.Println("########## 选择支付方式 ##########")
 	switch s.Conf.PayMethod {
-	case 0:
+	case 1:
 		fmt.Println("支付方式 : wechat ")
 		s.Channel = "wechat"
-	case 1:
+	case 2:
 		fmt.Println("支付方式 : alipay ")
 		s.Channel = "alipay"
 	default:
