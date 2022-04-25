@@ -6,6 +6,8 @@ import (
 	"strings"
 	"time"
 
+	"github.com/gen2brain/beeep"
+
 	"github.com/robGoods/sams/dd"
 )
 
@@ -182,6 +184,12 @@ func main() {
 					time.Sleep(1 * time.Second)
 				}
 			}
+
+			err = beeep.Alert("抢购成功", "请前往app付款!", "assets/warning.png")
+			if err != nil {
+				fmt.Println(err)
+			}
+
 			return
 		} else {
 			fmt.Printf("下单失败：%s\n", err)
