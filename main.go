@@ -90,8 +90,13 @@ func main() {
 			if v.FloorId == session.Conf.FloorId {
 				session.GoodsList = make([]dd.Goods, 0)
 				for index, goods := range v.NormalGoodsList {
+					if goods.StockQuantity >= goods.Quantity {
+						fmt.Printf("[%v] %s 数量：%v 总价：%d\n", index, goods.GoodsName, goods.Quantity, goods.Price)
+					} else {
+						fmt.Printf("[%v] %s 数量：(%v) < 库存(%d) 重置为：%d  总价：%d\n", index, goods.GoodsName, goods.Quantity, goods.StockQuantity, goods.StockQuantity, goods.Price)
+						v.NormalGoodsList[index].Quantity = goods.StockQuantity
+					}
 					session.GoodsList = append(session.GoodsList, goods.ToGoods())
-					fmt.Printf("[%v] %s 数量：%v 总价：%d\n", index, goods.GoodsName, goods.Quantity, goods.Price)
 				}
 				session.FloorInfo = v
 				session.DeliveryInfoVO = dd.DeliveryInfoVO{

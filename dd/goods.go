@@ -26,6 +26,7 @@ type NormalGoods struct {
 	Price         int    `json:"price"`
 	InvalidReason string `json:"invalidReason"`
 	Quantity      int    `json:"quantity"`
+	StockQuantity int    `json:"stockQuantity"`
 }
 
 func (this NormalGoods) ToGoods() Goods {
@@ -48,6 +49,7 @@ func parseNormalGoods(g gjson.Result) (error, NormalGoods) {
 		Price:         int(g.Get("price").Int()),
 		InvalidReason: g.Get("invalidReason").Str,
 		Quantity:      int(g.Get("quantity").Num),
+		StockQuantity: int(g.Get("stockQuantity").Num),
 	}
 	return nil, r
 }
