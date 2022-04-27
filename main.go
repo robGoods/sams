@@ -94,7 +94,7 @@ func main() {
 						fmt.Printf("[%v] %s 数量：%v 总价：%d\n", index, goods.GoodsName, goods.Quantity, goods.Price)
 					} else {
 						fmt.Printf("[%v] %s 数量：(%v) < 库存(%d) 重置为：%d  总价：%d\n", index, goods.GoodsName, goods.Quantity, goods.StockQuantity, goods.StockQuantity, goods.Price)
-						v.NormalGoodsList[index].Quantity = goods.StockQuantity
+						goods.Quantity = goods.StockQuantity
 					}
 					session.GoodsList = append(session.GoodsList, goods.ToGoods())
 				}
@@ -151,58 +151,67 @@ func main() {
 			goto CapacityLoop
 		}
 
-		session.SettleDeliveryInfo = dd.SettleDeliveryInfo{}
+		session.SettleDeliveryInfo = map[int]dd.SettleDeliveryInfo{}
 		for _, caps := range session.Capacity.CapCityResponseList {
 			for _, v := range caps.List {
 				fmt.Printf("配送时间： %s %s - %s, 是否可用：%v\n", caps.StrDate, v.StartTime, v.EndTime, !v.TimeISFull && !v.Disabled)
-				if v.TimeISFull == false && v.Disabled == false && session.SettleDeliveryInfo.ArrivalTimeStr == "" {
-					session.SettleDeliveryInfo.ArrivalTimeStr = fmt.Sprintf("%s %s - %s", caps.StrDate, v.StartTime, v.EndTime)
-					session.SettleDeliveryInfo.ExpectArrivalTime = v.StartRealTime
-					session.SettleDeliveryInfo.ExpectArrivalEndTime = v.EndRealTime
-					break
+				if v.TimeISFull == false && v.Disabled == false {
+					session.SettleDeliveryInfo[len(session.SettleDeliveryInfo)] = dd.SettleDeliveryInfo{
+						ArrivalTimeStr:       fmt.Sprintf("%s %s - %s", caps.StrDate, v.StartTime, v.EndTime),
+						ExpectArrivalTime:    v.StartRealTime,
+						ExpectArrivalEndTime: v.EndRealTime,
+					}
 				}
 			}
 		}
 
-		if session.SettleDeliveryInfo.ArrivalTimeStr != "" {
-			fmt.Printf("发现可用的配送时段::%s!\n", session.SettleDeliveryInfo.ArrivalTimeStr)
+		if len(session.SettleDeliveryInfo) > 0 {
+			for _, v := range session.SettleDeliveryInfo {
+				fmt.Printf("发现可用的配送时段::%s!\n", v.ArrivalTimeStr)
+			}
 		} else {
 			fmt.Println("当前无可用配送时间段")
 			time.Sleep(1 * time.Second)
 			goto CapacityLoop
 		}
 	OrderLoop:
-		err = session.CommitPay()
-		fmt.Printf("########## 提交订单中【%s】 ###########\n", time.Now().Format("15:04:05"))
-		if err == nil {
-			fmt.Println("抢购成功，请前往app付款！")
-			if session.Conf.BarkId != "" {
-				for true {
-					err = session.PushSuccess(fmt.Sprintf("Smas抢单成功，订单号：%s", session.OrderInfo.OrderNo))
-					if err == nil {
-						break
-					} else {
-						fmt.Println(err)
+		for len(session.SettleDeliveryInfo) > 0 {
+			for k, v := range session.SettleDeliveryInfo {
+				fmt.Printf("########## 提交订单中【%s】 ###########\n", time.Now().Format("15:04:05"))
+				fmt.Printf("配送时段: %s!\n", v.ArrivalTimeStr)
+				err = session.CommitPay(v)
+				if err == nil {
+					fmt.Println("抢购成功，请前往app付款！")
+					if session.Conf.BarkId != "" {
+						for true {
+							err = session.PushSuccess(fmt.Sprintf("Smas抢单成功，订单号：%s", session.OrderInfo.OrderNo))
+							if err == nil {
+								break
+							} else {
+								fmt.Println(err)
+							}
+							time.Sleep(1 * time.Second)
+						}
 					}
-					time.Sleep(1 * time.Second)
+					return
+				} else {
+					fmt.Printf("下单失败：%s\n", err)
+					switch err {
+					case dd.LimitedErr1:
+						fmt.Println("立即重试...")
+						goto OrderLoop
+					case dd.OOSErr, dd.PreGoodNotStartSellErr:
+						goto CartLoop
+					case dd.StoreHasClosedError:
+						goto StoreLoop
+					case dd.CloseOrderTimeExceptionErr, dd.DecreaseCapacityCountError, dd.NotDeliverCapCityErr:
+						delete(session.SettleDeliveryInfo, k)
+					default:
+						goto CapacityLoop
+					}
 				}
 			}
-			return
-		} else {
-			fmt.Printf("下单失败：%s\n", err)
-			switch err {
-			case dd.LimitedErr1:
-				fmt.Println("立即重试...")
-				goto OrderLoop
-			case dd.CloseOrderTimeExceptionErr, dd.DecreaseCapacityCountError, dd.NotDeliverCapCityErr:
-				goto CapacityLoop
-			case dd.OOSErr, dd.PreGoodNotStartSellErr:
-				goto CartLoop
-			case dd.StoreHasClosedError:
-				goto StoreLoop
-			default:
-				goto CapacityLoop
-			}
 		}
+		goto CapacityLoop
 	}
 }

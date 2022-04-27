@@ -71,7 +71,7 @@ func (s *DingdongSession) GetOrderInfo(result gjson.Result) error {
 	return nil
 }
 
-func (s *DingdongSession) CommitPay() error {
+func (s *DingdongSession) CommitPay(info SettleDeliveryInfo) error {
 	urlPath := "https://api-sams.walmartmobile.cn/api/v1/sams/trade/settlement/commitPay"
 
 	data := CommitPayPram{
@@ -81,7 +81,7 @@ func (s *DingdongSession) CommitPay() error {
 		FloorId:            s.SettleInfo.FloorId,
 		Amount:             s.FloorInfo.Amount,
 		PurchaserName:      "",
-		SettleDeliveryInfo: s.SettleDeliveryInfo,
+		SettleDeliveryInfo: info,
 		TradeType:          "APP",
 		PurchaserId:        "",
 		PayType:            0,

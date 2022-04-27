@@ -27,19 +27,19 @@ type Config struct {
 
 type DingdongSession struct {
 	Conf               Config
-	Address            Address            `json:"address"`
-	Uid                string             `json:"uid"`
-	Capacity           Capacity           `json:"capacity"`
-	Channel            string             `json:"channel"` //0 => wechat  1 =>alipay
-	SettleInfo         SettleInfo         `json:"settleInfo"`
-	DeliveryInfoVO     DeliveryInfoVO     `json:"deliveryInfoVO"`
-	SettleDeliveryInfo SettleDeliveryInfo `json:"settleDeliveryInfo"`
-	GoodsList          []Goods            `json:"goods"`
-	FloorInfo          FloorInfo          `json:"floorInfo"`
-	StoreList          []Store            `json:"store"`
-	OrderInfo          OrderInfo          `json:"orderInfo"`
-	Client             *http.Client       `json:"client"`
-	Cart               Cart               `json:"cart"`
+	Address            Address                    `json:"address"`
+	Uid                string                     `json:"uid"`
+	Capacity           Capacity                   `json:"capacity"`
+	Channel            string                     `json:"channel"` //0 => wechat  1 =>alipay
+	SettleInfo         SettleInfo                 `json:"settleInfo"`
+	DeliveryInfoVO     DeliveryInfoVO             `json:"deliveryInfoVO"`
+	SettleDeliveryInfo map[int]SettleDeliveryInfo `json:"settleDeliveryInfo"`
+	GoodsList          []Goods                    `json:"goods"`
+	FloorInfo          FloorInfo                  `json:"floorInfo"`
+	StoreList          []Store                    `json:"store"`
+	OrderInfo          OrderInfo                  `json:"orderInfo"`
+	Client             *http.Client               `json:"client"`
+	Cart               Cart                       `json:"cart"`
 }
 
 func (s *DingdongSession) InitSession(conf Config) error {
@@ -65,7 +65,15 @@ func (s *DingdongSession) InitSession(conf Config) error {
 		return errors.New("未查询到有效收货地址，请前往app添加或检查cookie是否正确！")
 	}
 	var index int
-	if s.Conf.AddressId == "" {
+	if s.Conf.AddressId != "" {
+		for _, v := range addrList {
+			if v.AddressId == s.Conf.AddressId {
+				s.Address = v
+				fmt.Printf("收货地址 :  %s %s %s %s %s \n", s.Address.Name, s.Address.DistrictName, s.Address.ReceiverAddress, s.Address.DetailAddress, s.Address.Mobile)
+			}
+		}
+	}
+	if s.Address.AddressId == "" {
 		fmt.Println("########## 选择收货地址 ##########")
 		for i, addr := range addrList {
 			fmt.Printf("[%v] %s %s %s %s %s \n", i, addr.Name, addr.DistrictName, addr.ReceiverAddress, addr.DetailAddress, addr.Mobile)
@@ -83,13 +91,6 @@ func (s *DingdongSession) InitSession(conf Config) error {
 			}
 		}
 		s.Address = addrList[index]
-	} else {
-		for _, v := range addrList {
-			if v.AddressId == s.Conf.AddressId {
-				s.Address = v
-				fmt.Printf("收货地址 :  %s %s %s %s %s \n", s.Address.Name, s.Address.DistrictName, s.Address.ReceiverAddress, s.Address.DetailAddress, s.Address.Mobile)
-			}
-		}
 	}
 
 	fmt.Println("########## 选择支付方式 ##########")
