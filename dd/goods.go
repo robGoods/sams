@@ -62,11 +62,7 @@ func (s *DingdongSession) CheckGoods() error {
 	data["storeId"] = ""
 	for _, v := range s.Cart.FloorInfoList {
 		if v.FloorId == s.Conf.FloorId {
-			for _, v := range v.NormalGoodsList {
-				if data["storeId"] == "" {
-					data["storeId"] = v.StoreId
-				}
-			}
+			data["storeId"] = v.StoreInfo.StoreId
 		}
 	}
 	data["goodsList"] = s.GoodsList
