@@ -60,18 +60,16 @@ func (s *DingdongSession) CheckGoods() error {
 	data := make(map[string]interface{})
 	data["floorId"] = 1
 	data["storeId"] = ""
-	goods := make([]Goods, 0)
 	for _, v := range s.Cart.FloorInfoList {
 		if v.FloorId == s.Conf.FloorId {
 			for _, v := range v.NormalGoodsList {
 				if data["storeId"] == "" {
 					data["storeId"] = v.StoreId
 				}
-				goods = append(goods, Goods{StoreId: v.StoreId, Quantity: v.Quantity, SpuId: v.SpuId})
 			}
 		}
 	}
-	data["goodsList"] = goods
+	data["goodsList"] = s.GoodsList
 	dataStr, _ := json.Marshal(data)
 	req := s.NewRequest("POST", urlPath, dataStr)
 
