@@ -99,6 +99,8 @@ func (s *DingdongSession) CheckCart() error {
 		switch result.Get("code").Str {
 		case "Success":
 			return s.GetCart(result)
+		case "LIMITED":
+			return LimitedErr1
 		default:
 			return errors.New(result.Get("msg").Str)
 		}

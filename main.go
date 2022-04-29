@@ -1,6 +1,7 @@
 package main
 
 import (
+	"errors"
 	"flag"
 	"fmt"
 	"strings"
@@ -85,7 +86,7 @@ func main() {
 		}
 	CartLoop:
 		fmt.Printf("########## 获取购物车中有效商品【%s】 ###########\n", time.Now().Format("15:04:05"))
-		session.CheckCart()
+		err = session.CheckCart()
 		for _, v := range session.Cart.FloorInfoList {
 			if v.FloorId == session.Conf.FloorId {
 				session.GoodsList = make([]dd.Goods, 0)
@@ -112,7 +113,14 @@ func main() {
 			}
 		}
 		if len(session.GoodsList) == 0 {
-			fmt.Println("当前购物车中无有效商品")
+			if err != nil {
+				fmt.Println(err)
+			} else {
+				fmt.Println("当前购物车中无有效商品")
+			}
+			if errors.Is(err, dd.LimitedErr1) {
+				time.Sleep(1 * time.Second)
+			}
 			goto CartLoop
 		}
 	GoodsLoop:
