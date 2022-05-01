@@ -91,27 +91,31 @@ func main() {
 			if v.FloorId == session.Conf.FloorId {
 				session.GoodsList = make([]dd.Goods, 0)
 				for _, goods := range v.NormalGoodsList {
-					if goods.StockQuantity <= goods.Quantity {
-						goods.Quantity = goods.StockQuantity
-					}
-					session.GoodsList = append(session.GoodsList, goods.ToGoods())
-				}
-
-				for _, goods := range v.ShortageStockGoodsList {
-					if goods.StockQuantity <= goods.Quantity {
-						goods.Quantity = goods.StockQuantity
-					}
-					session.GoodsList = append(session.GoodsList, goods.ToGoods())
-				}
-
-				for _, goods := range v.AllOutOfStockGoodsList {
-					if goods.StockQuantity > 0 {
+					if goods.StockQuantity > 0 && goods.StockStatus && goods.IsPutOnSale && goods.IsAvailable {
 						if goods.StockQuantity <= goods.Quantity {
 							goods.Quantity = goods.StockQuantity
 						}
 						session.GoodsList = append(session.GoodsList, goods.ToGoods())
 					}
 				}
+
+				for _, goods := range v.ShortageStockGoodsList {
+					if goods.StockQuantity > 0 && goods.StockStatus && goods.IsPutOnSale && goods.IsAvailable {
+						if goods.StockQuantity <= goods.Quantity {
+							goods.Quantity = goods.StockQuantity
+						}
+						session.GoodsList = append(session.GoodsList, goods.ToGoods())
+					}
+				}
+
+				//for _, goods := range v.AllOutOfStockGoodsList {
+				//	if goods.StockQuantity > 0 && goods.StockStatus && goods.IsPutOnSale && goods.IsAvailable {
+				//		if goods.StockQuantity <= goods.Quantity {
+				//			goods.Quantity = goods.StockQuantity
+				//		}
+				//		session.GoodsList = append(session.GoodsList, goods.ToGoods())
+				//	}
+				//}
 
 				session.FloorInfo = v
 				session.DeliveryInfoVO = dd.DeliveryInfoVO{
@@ -140,7 +144,7 @@ func main() {
 			if errors.Is(err, dd.LimitedErr1) {
 				time.Sleep(1 * time.Second)
 			}
-			goto CartLoop
+			goto StoreLoop
 		}
 	GoodsLoop:
 		fmt.Printf("########## 开始校验当前商品【%s】 ###########\n", time.Now().Format("15:04:05"))
