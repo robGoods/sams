@@ -10,6 +10,8 @@ import (
 )
 
 type Goods struct {
+	GoodsName  string `json:"-"`
+	Price      int    `json:"-"`
 	IsSelected bool   `json:"isSelected"`
 	Quantity   int    `json:"quantity"`
 	SpuId      string `json:"spuId"`
@@ -32,6 +34,8 @@ type NormalGoods struct {
 func (this NormalGoods) ToGoods() Goods {
 	return Goods{
 		IsSelected: true,
+		GoodsName:  this.GoodsName,
+		Price:      this.Price,
 		Quantity:   this.Quantity,
 		SpuId:      this.SpuId,
 		StoreId:    this.StoreId,

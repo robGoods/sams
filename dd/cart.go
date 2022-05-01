@@ -16,11 +16,13 @@ type Cart struct {
 }
 
 type FloorInfo struct {
-	FloorId         int           `json:"floorId"`
-	NormalGoodsList []NormalGoods `json:"normalGoodsList"`
-	Amount          string        `json:"amount"`
-	Quantity        int           `json:"quantity"`
-	StoreInfo       StoreInfo     `json:"storeInfo"`
+	FloorId                int           `json:"floorId"`
+	NormalGoodsList        []NormalGoods `json:"normalGoodsList"`
+	ShortageStockGoodsList []NormalGoods `json:"ShortageStockGoodsList"`
+	AllOutOfStockGoodsList []NormalGoods `json:"allOutOfStockGoodsList"`
+	Amount                 string        `json:"amount"`
+	Quantity               int           `json:"quantity"`
+	StoreInfo              StoreInfo     `json:"storeInfo"`
 }
 
 func parseFloorInfos(g gjson.Result) (error, FloorInfo) {
@@ -35,6 +37,9 @@ func parseFloorInfos(g gjson.Result) (error, FloorInfo) {
 			StoreDeliveryTemplateId: g.Get("storeInfo.storeDeliveryTemplateId").Str,
 			DeliveryModeId:          g.Get("storeInfo.deliveryModeId").Str,
 		},
+		NormalGoodsList:        make([]NormalGoods, 0),
+		ShortageStockGoodsList: make([]NormalGoods, 0),
+		AllOutOfStockGoodsList: make([]NormalGoods, 0),
 	}
 	for _, normalGoods := range g.Get("normalGoodsList").Array() {
 		_, p := parseNormalGoods(normalGoods)
@@ -49,7 +54,13 @@ func parseFloorInfos(g gjson.Result) (error, FloorInfo) {
 
 	for _, shortageStockGoods := range g.Get("shortageStockGoodsList").Array() {
 		_, p := parseNormalGoods(shortageStockGoods)
-		r.NormalGoodsList = append(r.NormalGoodsList, p)
+		r.ShortageStockGoodsList = append(r.ShortageStockGoodsList, p)
+	}
+
+	//查询无货商品是否上架
+	for _, outOfStockGoods := range g.Get("allOutOfStockGoodsList").Array() {
+		_, p := parseNormalGoods(outOfStockGoods)
+		r.AllOutOfStockGoodsList = append(r.AllOutOfStockGoodsList, p)
 	}
 
 	return nil, r
@@ -58,7 +69,6 @@ func (s *DingdongSession) GetCart(result gjson.Result) error {
 	c := Cart{
 		FloorInfoList: make([]FloorInfo, 0),
 	}
-
 	for _, v := range result.Get("data.floorInfoList").Array() {
 		_, floor := parseFloorInfos(v)
 		c.FloorInfoList = append(c.FloorInfoList, floor)

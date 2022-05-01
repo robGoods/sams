@@ -90,15 +90,29 @@ func main() {
 		for _, v := range session.Cart.FloorInfoList {
 			if v.FloorId == session.Conf.FloorId {
 				session.GoodsList = make([]dd.Goods, 0)
-				for index, goods := range v.NormalGoodsList {
-					if goods.StockQuantity >= goods.Quantity {
-						fmt.Printf("[%v] %s 数量：%v 总价：%d\n", index, goods.GoodsName, goods.Quantity, goods.Price)
-					} else {
-						fmt.Printf("[%v] %s 数量：(%v) < 库存(%d) 重置为：%d  总价：%d\n", index, goods.GoodsName, goods.Quantity, goods.StockQuantity, goods.StockQuantity, goods.Price)
+				for _, goods := range v.NormalGoodsList {
+					if goods.StockQuantity <= goods.Quantity {
 						goods.Quantity = goods.StockQuantity
 					}
 					session.GoodsList = append(session.GoodsList, goods.ToGoods())
 				}
+
+				for _, goods := range v.ShortageStockGoodsList {
+					if goods.StockQuantity <= goods.Quantity {
+						goods.Quantity = goods.StockQuantity
+					}
+					session.GoodsList = append(session.GoodsList, goods.ToGoods())
+				}
+
+				for _, goods := range v.AllOutOfStockGoodsList {
+					if goods.StockQuantity > 0 {
+						if goods.StockQuantity <= goods.Quantity {
+							goods.Quantity = goods.StockQuantity
+						}
+						session.GoodsList = append(session.GoodsList, goods.ToGoods())
+					}
+				}
+
 				session.FloorInfo = v
 				session.DeliveryInfoVO = dd.DeliveryInfoVO{
 					StoreDeliveryTemplateId: v.StoreInfo.StoreDeliveryTemplateId,
@@ -112,6 +126,11 @@ func main() {
 				//}
 			}
 		}
+
+		for index, goods := range session.GoodsList {
+			fmt.Printf("[%v] %s 数量：%v 总价：%d\n", index, goods.GoodsName, goods.Quantity, goods.Price)
+		}
+
 		if len(session.GoodsList) == 0 {
 			if err != nil {
 				fmt.Println(err)
