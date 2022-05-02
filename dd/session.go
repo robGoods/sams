@@ -36,7 +36,7 @@ type DingdongSession struct {
 	SettleDeliveryInfo map[int]SettleDeliveryInfo `json:"settleDeliveryInfo"`
 	GoodsList          []Goods                    `json:"goods"`
 	FloorInfo          FloorInfo                  `json:"floorInfo"`
-	StoreList          []Store                    `json:"store"`
+	StoreList          map[string]Store           `json:"store"`
 	OrderInfo          OrderInfo                  `json:"orderInfo"`
 	Client             *http.Client               `json:"client"`
 	Cart               Cart                       `json:"cart"`

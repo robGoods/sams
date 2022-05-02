@@ -32,6 +32,7 @@ type NormalGoods struct {
 	StockStatus   bool   `json:"stockStatus"`
 	IsPutOnSale   bool   `json:"isPutOnSale"`
 	IsAvailable   bool   `json:"isAvailable"`
+	LimitNum      int    `json:"limitNum"`
 }
 
 func (this NormalGoods) ToGoods() Goods {
@@ -57,9 +58,10 @@ func parseNormalGoods(g gjson.Result) (error, NormalGoods) {
 		InvalidReason: g.Get("invalidReason").Str,
 		Quantity:      int(g.Get("quantity").Num),
 		StockQuantity: int(g.Get("stockQuantity").Num),
-		StockStatus: g.Get("stockStatus").Bool(),
-		IsPutOnSale: g.Get("isPutOnSale").Bool(),
-		IsAvailable: g.Get("isAvailable").Bool(),
+		StockStatus:   g.Get("stockStatus").Bool(),
+		IsPutOnSale:   g.Get("isPutOnSale").Bool(),
+		IsAvailable:   g.Get("isAvailable").Bool(),
+		LimitNum:      int(g.Get("purchaseLimitVO.limitNum").Int()),
 	}
 	return nil, r
 }

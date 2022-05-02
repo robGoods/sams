@@ -81,16 +81,30 @@ func (s *DingdongSession) GetCart(result gjson.Result) error {
 	return nil
 }
 
+type GetCartPram struct {
+	Uid               string  `json:"uid"`
+	DeviceType        string  `json:"deviceType"`
+	StoreList         []Store `json:"storeList"`
+	DeliveryType      int     `json:"deliveryType"`
+	HomePagelongitude string  `json:"homePagelongitude"`
+	HomePagelatitude  string  `json:"homePagelatitude"`
+}
+
 func (s *DingdongSession) CheckCart() error {
 	urlPath := "https://api-sams.walmartmobile.cn/api/v1/sams/trade/cart/getUserCart"
 
-	data := make(map[string]interface{})
-	data["uid"] = ""
-	data["deviceType"] = "ios"
-	data["storeList"] = s.StoreList
-	data["deliveryType"] = s.Conf.DeliveryType
-	data["homePagelongitude"] = s.Address.Longitude
-	data["homePagelatitude"] = s.Address.Latitude
+	data := GetCartPram{
+		Uid:               "",
+		DeviceType:        "ios",
+		StoreList:         make([]Store, 0),
+		DeliveryType:      s.Conf.DeliveryType,
+		HomePagelongitude: s.Address.Longitude,
+		HomePagelatitude:  s.Address.Latitude,
+	}
+
+	for _, store := range s.StoreList {
+		data.StoreList = append(data.StoreList, store)
+	}
 
 	dataStr, _ := json.Marshal(data)
 	req := s.NewRequest("POST", urlPath, dataStr)

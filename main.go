@@ -41,7 +41,10 @@ func main() {
 		return c == ','
 	}
 
-	session := dd.DingdongSession{}
+	session := dd.DingdongSession{
+		SettleDeliveryInfo: map[int]dd.SettleDeliveryInfo{},
+		StoreList:          map[string]dd.Store{},
+	}
 	conf := dd.Config{
 		AuthToken:    *authToken,                                //HTTP头部auth-token
 		BarkId:       *barkId,                                   //通知用的bark id，下载bark后从app界面获取, 如果不需要可以填空字符串
@@ -75,14 +78,17 @@ func main() {
 		}
 	StoreLoop:
 		fmt.Println("########## 获取地址附近可用商店 ###########")
-		err = session.CheckStore()
+		stores, err := session.CheckStore()
 		if err != nil {
 			fmt.Printf("%s", err)
 			goto StoreLoop
 		}
 
-		for index, store := range session.StoreList {
-			fmt.Printf("[%v] Id：%s 名称：%s, 类型 ：%s\n", index, store.StoreId, store.StoreName, store.StoreType)
+		for index, store := range stores {
+			if _, ok := session.StoreList[store.StoreId]; !ok {
+				session.StoreList[store.StoreId] = store
+				fmt.Printf("[%v] Id：%s 名称：%s, 类型 ：%s\n", index, store.StoreId, store.StoreName, store.StoreType)
+			}
 		}
 	CartLoop:
 		fmt.Printf("########## 获取购物车中有效商品【%s】 ###########\n", time.Now().Format("15:04:05"))
@@ -95,6 +101,9 @@ func main() {
 						if goods.StockQuantity <= goods.Quantity {
 							goods.Quantity = goods.StockQuantity
 						}
+						if goods.LimitNum > 0 && goods.Quantity > goods.LimitNum {
+							goods.Quantity = goods.LimitNum
+						}
 						session.GoodsList = append(session.GoodsList, goods.ToGoods())
 					}
 				}
@@ -103,6 +112,9 @@ func main() {
 					if goods.StockQuantity > 0 && goods.StockStatus && goods.IsPutOnSale && goods.IsAvailable {
 						if goods.StockQuantity <= goods.Quantity {
 							goods.Quantity = goods.StockQuantity
+						}
+						if goods.LimitNum > 0 && goods.Quantity > goods.LimitNum {
+							goods.Quantity = goods.LimitNum
 						}
 						session.GoodsList = append(session.GoodsList, goods.ToGoods())
 					}

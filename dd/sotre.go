@@ -23,9 +23,8 @@ type Store struct {
 	DeliveryModeId          string `json:"deliveryModeId"`
 }
 
-func (s *DingdongSession) GetStoreList(result gjson.Result) error {
+func (s *DingdongSession) GetStoreList(result gjson.Result) []Store {
 	c := make([]Store, 0)
-
 	for _, v := range result.Get("data.storeList").Array() {
 		c = append(c, Store{
 			StoreId:                 v.Get("storeId").Str,
@@ -36,12 +35,11 @@ func (s *DingdongSession) GetStoreList(result gjson.Result) error {
 			DeliveryModeId:          v.Get("storeDeliveryModeVerifyData.deliveryModeId").Str,
 		})
 	}
-	s.StoreList = c
-	return nil
 
+	return c
 }
 
-func (s *DingdongSession) CheckStore() error {
+func (s *DingdongSession) CheckStore() ([]Store, error) {
 	urlPath := "https://api-sams.walmartmobile.cn/api/v1/sams/merchant/storeApi/getRecommendStoreListByLocation"
 
 	data := StoreListParam{
@@ -54,22 +52,22 @@ func (s *DingdongSession) CheckStore() error {
 
 	resp, err := s.Client.Do(req)
 	if err != nil {
-		return err
+		return nil, err
 	}
 	body, err := ioutil.ReadAll(resp.Body)
 	if err != nil {
-		return err
+		return nil, err
 	}
 	resp.Body.Close()
 	if resp.StatusCode == 200 {
 		result := gjson.Parse(string(body))
 		switch result.Get("code").Str {
 		case "Success":
-			return s.GetStoreList(result)
+			return s.GetStoreList(result), nil
 		default:
-			return errors.New(result.Get("msg").Str)
+			return nil, errors.New(result.Get("msg").Str)
 		}
 	} else {
-		return errors.New(fmt.Sprintf("[%v] %s", resp.StatusCode, body))
+		return nil, errors.New(fmt.Sprintf("[%v] %s", resp.StatusCode, body))
 	}
 }
