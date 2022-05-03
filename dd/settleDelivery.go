@@ -45,6 +45,7 @@ type SettleInfo struct {
 	Uid             string         `json:"uid"`
 	FloorId         int            `json:"floorId"`
 	FloorName       string         `json:"floorName"`
+	DeliveryFee     string         `json:"deliveryFee"`
 	SettleDelivery  SettleDelivery `json:"settleDelivery"`
 	DeliveryAddress Address        `json:"deliveryAddress"`
 }
@@ -61,6 +62,7 @@ func (s *DingdongSession) GetSettleInfo(result gjson.Result) error {
 	r.Uid = result.Get("data.uid").Str
 	r.FloorId = int(result.Get("data.floorId").Num)
 	r.FloorName = result.Get("data.floorName").Str
+	r.DeliveryFee = result.Get("data.deliveryFee").Str
 	address, err := parseAddress(result.Get("data.deliveryAddress"))
 	if err == nil {
 		r.DeliveryAddress = address

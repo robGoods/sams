@@ -23,6 +23,8 @@ var (
 	promotionId  = flag.String("promotionId", "", "可选，优惠券id,多个用逗号隔开，山姆app优惠券列表接口中的'ruleId'字段")
 	addressId    = flag.String("addressId", "", "可选，地址id")
 	payMethod    = flag.Int("payMethod", 1, "可选，1,微信 2,支付宝")
+	deliveryFee  = flag.Bool("deliveryFee", false, "可选，是否免运费下单")
+	checkGoods   = flag.Bool("checkGoods", true, "可选，是否校验商品限购")
 )
 
 func main() {
@@ -57,6 +59,8 @@ func main() {
 		PromotionId:  strings.FieldsFunc(*promotionId, splitFn), //优惠券id
 		AddressId:    *addressId,                                //地址
 		PayMethod:    *payMethod,                                //支付方式
+		DeliveryFee:  *deliveryFee,
+		CheckGoods:   *checkGoods,
 	}
 
 	err := session.InitSession(conf)
@@ -101,7 +105,7 @@ func main() {
 						if goods.StockQuantity <= goods.Quantity {
 							goods.Quantity = goods.StockQuantity
 						}
-						if goods.LimitNum > 0 && goods.Quantity > goods.LimitNum {
+						if session.Conf.CheckGoods && goods.LimitNum > 0 && goods.Quantity > goods.LimitNum {
 							goods.Quantity = goods.LimitNum
 						}
 						session.GoodsList = append(session.GoodsList, goods.ToGoods())
@@ -113,7 +117,7 @@ func main() {
 						if goods.StockQuantity <= goods.Quantity {
 							goods.Quantity = goods.StockQuantity
 						}
-						if goods.LimitNum > 0 && goods.Quantity > goods.LimitNum {
+						if session.Conf.CheckGoods && goods.LimitNum > 0 && goods.Quantity > goods.LimitNum {
 							goods.Quantity = goods.LimitNum
 						}
 						session.GoodsList = append(session.GoodsList, goods.ToGoods())
@@ -160,14 +164,16 @@ func main() {
 		}
 	GoodsLoop:
 		fmt.Printf("########## 开始校验当前商品【%s】 ###########\n", time.Now().Format("15:04:05"))
-		if err = session.CheckGoods(); err != nil {
-			fmt.Println(err)
-			time.Sleep(1 * time.Second)
-			switch err {
-			case dd.OOSErr:
-				goto CartLoop
-			default:
-				goto GoodsLoop
+		if session.Conf.CheckGoods {
+			if err = session.CheckGoods(); err != nil {
+				fmt.Println(err)
+				time.Sleep(1 * time.Second)
+				switch err {
+				case dd.OOSErr:
+					goto CartLoop
+				default:
+					goto GoodsLoop
+				}
 			}
 		}
 		if err = session.CheckSettleInfo(); err != nil {
@@ -182,6 +188,11 @@ func main() {
 				goto SaveDeliveryAddress
 			default:
 				goto GoodsLoop
+			}
+		} else {
+			fmt.Printf("运费： %s\n", session.SettleInfo.DeliveryFee)
+			if session.Conf.DeliveryFee && session.SettleInfo.DeliveryFee != "0" {
+				goto CartLoop
 			}
 		}
 	CapacityLoop:

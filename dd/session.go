@@ -23,6 +23,8 @@ type Config struct {
 	PromotionId  []string
 	AddressId    string
 	PayMethod    int //支付方式
+	DeliveryFee  bool
+	CheckGoods   bool
 }
 
 type DingdongSession struct {
