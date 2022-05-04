@@ -254,7 +254,7 @@ func main() {
 					case dd.LimitedErr1:
 						fmt.Println("立即重试...")
 						goto OrderLoop
-					case dd.OOSErr, dd.PreGoodNotStartSellErr:
+					case dd.OOSErr, dd.PreGoodNotStartSellErr, dd.CartGoodChangeErr:
 						goto CartLoop
 					case dd.StoreHasClosedError:
 						goto StoreLoop

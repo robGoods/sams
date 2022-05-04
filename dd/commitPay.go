@@ -145,6 +145,8 @@ func (s *DingdongSession) CommitPay(info SettleDeliveryInfo) error {
 			return StoreHasClosedError
 		case "PRE_GOOD_NOT_START_SELL":
 			return PreGoodNotStartSellErr
+		case "CART_GOOD_CHANGE":
+			return CartGoodChangeErr
 		default:
 			return errors.New(result.Get("msg").Str)
 		}
