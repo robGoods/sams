@@ -133,6 +133,8 @@ func (s *DingdongSession) CommitPay(info SettleDeliveryInfo) error {
 			return errors.New(result.Get("data.failReason").Str)
 		case "LIMITED":
 			return LimitedErr1
+		case "GOODS_EXCEED_LIMIT":
+			return GoodsExceedLimitErr
 		case "CLOSE_ORDER_TIME_EXCEPTION":
 			return CloseOrderTimeExceptionErr
 		case "DECREASE_CAPACITY_COUNT_ERROR":
