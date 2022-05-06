@@ -36,6 +36,10 @@ Usage of ./sams:
     	必选, Sam's App HTTP头部auth-token
   -barkId bark
     	可选，通知用的bark id, 可选参数
+  -checkGoods
+        可选，是否校验商品限购 (default true)
+  -deliveryFee
+        可选，是否免运费下单
   -deliveryType int
     	可选，1 急速达，2， 全程配送 (default 2)
   -deviceId string
