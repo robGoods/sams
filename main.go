@@ -124,14 +124,19 @@ func main() {
 					}
 				}
 
-				//for _, goods := range v.AllOutOfStockGoodsList {
-				//	if goods.StockQuantity > 0 && goods.StockStatus && goods.IsPutOnSale && goods.IsAvailable {
-				//		if goods.StockQuantity <= goods.Quantity {
-				//			goods.Quantity = goods.StockQuantity
-				//		}
-				//		session.GoodsList = append(session.GoodsList, goods.ToGoods())
-				//	}
-				//}
+				for _, goods := range v.AllOutOfStockGoodsList {
+					if goods.StockQuantity > 0 && goods.StockStatus && goods.IsPutOnSale && goods.IsAvailable {
+						if goods.StockQuantity <= goods.Quantity {
+							goods.Quantity = goods.StockQuantity
+						}
+
+						if session.Conf.CheckGoods && goods.LimitNum > 0 && goods.Quantity > goods.LimitNum {
+							goods.Quantity = goods.LimitNum
+						}
+
+						session.GoodsList = append(session.GoodsList, goods.ToGoods())
+					}
+				}
 
 				session.FloorInfo = v
 				session.DeliveryInfoVO = dd.DeliveryInfoVO{
