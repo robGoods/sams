@@ -88,6 +88,18 @@ func main() {
 			goto StoreLoop
 		}
 
+		//商店预加载，可以修改为自己地址附近的商店
+		stores = append(stores, dd.Store{
+			StoreId:                 "6809",
+			StoreName:               "上海唐镇DC",
+			StoreType:               "4",
+			AreaBlockId:             "1203944732519197718",
+			StoreDeliveryTemplateId: "1204037091042941206",
+			DeliveryModeId:          "1009",
+			DeliveryType:            2,
+			Capacity:                &dd.Capacity{},
+		})
+
 		for index, store := range stores {
 			if _, ok := session.StoreList[store.StoreId]; !ok {
 				session.StoreList[store.StoreId] = store
@@ -202,7 +214,7 @@ func main() {
 		}
 	CapacityLoop:
 		fmt.Printf("########## 获取当前可用配送时间【%s】 ###########\n", time.Now().Format("15:04:05"))
-		err = session.CheckCapacity()
+		capacity, err := session.GetCapacity(session.DeliveryInfoVO.StoreDeliveryTemplateId)
 		if err != nil {
 			fmt.Println(err)
 			time.Sleep(1 * time.Second)
@@ -211,9 +223,8 @@ func main() {
 		}
 
 		session.SettleDeliveryInfo = map[int]dd.SettleDeliveryInfo{}
-		for _, caps := range session.Capacity.CapCityResponseList {
+		for _, caps := range capacity.CapCityResponseList {
 			for _, v := range caps.List {
-				fmt.Printf("配送时间： %s %s - %s, 是否可用：%v\n", caps.StrDate, v.StartTime, v.EndTime, !v.TimeISFull && !v.Disabled)
 				if v.TimeISFull == false && v.Disabled == false {
 					session.SettleDeliveryInfo[len(session.SettleDeliveryInfo)] = dd.SettleDeliveryInfo{
 						ArrivalTimeStr:       fmt.Sprintf("%s %s - %s", caps.StrDate, v.StartTime, v.EndTime),

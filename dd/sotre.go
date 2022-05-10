@@ -4,9 +4,8 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
-	"io/ioutil"
-
 	"github.com/tidwall/gjson"
+	"io/ioutil"
 )
 
 type StoreListParam struct {
@@ -21,6 +20,8 @@ type Store struct {
 	AreaBlockId             string `json:"areaBlockId"`
 	StoreDeliveryTemplateId string `json:"storeDeliveryTemplateId"`
 	DeliveryModeId          string `json:"deliveryModeId"`
+	DeliveryType            int    `json:"DeliveryType"`
+	Capacity                *Capacity
 }
 
 func (s *DingdongSession) GetStoreList(result gjson.Result) []Store {
@@ -33,6 +34,8 @@ func (s *DingdongSession) GetStoreList(result gjson.Result) []Store {
 			AreaBlockId:             v.Get("storeAreaBlockVerifyData.areaBlockId").Str,
 			StoreDeliveryTemplateId: v.Get("storeRecmdDeliveryTemplateData.storeDeliveryTemplateId").Str,
 			DeliveryModeId:          v.Get("storeDeliveryModeVerifyData.deliveryModeId").Str,
+			DeliveryType:            int(v.Get("storeDeliveryModeVerifyData.deliveryType").Int()),
+			Capacity:                &Capacity{},
 		})
 	}
 

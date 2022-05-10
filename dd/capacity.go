@@ -4,10 +4,9 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
+	"github.com/tidwall/gjson"
 	"io/ioutil"
 	"time"
-
-	"github.com/tidwall/gjson"
 )
 
 type CapCityResponse struct {
@@ -35,7 +34,7 @@ type Capacity struct {
 	PortalPerformanceTemplate string            `json:"getPortalPerformanceTemplateResponse"`
 }
 
-func parseCapacity(g gjson.Result) (error, CapCityResponse) {
+func parseCapacityList(g gjson.Result) CapCityResponse {
 	var list []List
 	for _, v := range g.Get("list").Array() {
 		list = append(list, List{
@@ -49,49 +48,42 @@ func parseCapacity(g gjson.Result) (error, CapCityResponse) {
 			EndRealTime:   v.Get("endRealTime").Str,
 		})
 	}
-	capacity := CapCityResponse{
+	return CapCityResponse{
 		StrDate:        g.Get("strDate").Str,
 		DeliveryDesc:   g.Get("deliveryDesc").Str,
 		DeliveryDescEn: g.Get("deliveryDescEn").Str,
 		DateISFull:     g.Get("dateISFull").Bool(),
 		List:           list,
 	}
-	return nil, capacity
 }
 
-func (s *DingdongSession) GetCapacity(result gjson.Result) error {
+func parseCapacity(result gjson.Result) *Capacity {
 	var capCityResponseList []CapCityResponse
 	for _, v := range result.Get("data.capcityResponseList").Array() {
-		_, product := parseCapacity(v)
-		capCityResponseList = append(capCityResponseList, product)
+		capCityResponseList = append(capCityResponseList, parseCapacityList(v))
 	}
-	s.Capacity = Capacity{
+	return &Capacity{
 		Data:                      result.String(),
 		CapCityResponseList:       capCityResponseList,
 		PortalPerformanceTemplate: result.Get("data.getPortalPerformanceTemplateResponse").Str,
 	}
-	return nil
 }
 
-func (s *DingdongSession) CheckCapacity() error {
+func (s *DingdongSession) GetCapacity(storeDeliveryTemplateId string) (*Capacity, error) {
 	urlPath := "https://api-sams.walmartmobile.cn/api/v1/sams/delivery/portal/getCapacityData"
-
 	data := make(map[string]interface{})
 	data["perDateList"] = []string{time.Now().Format("2006-01-02"), time.Now().AddDate(0, 0, 1).Format("2006-01-02")}
-	data["storeDeliveryTemplateId"] = s.DeliveryInfoVO.StoreDeliveryTemplateId
-	if s.SettleInfo.SettleDelivery.StoreDeliveryTemplateId != "" {
-		data["storeDeliveryTemplateId"] = s.SettleInfo.SettleDelivery.StoreDeliveryTemplateId
-	}
+	data["storeDeliveryTemplateId"] = storeDeliveryTemplateId
 	dataStr, _ := json.Marshal(data)
 	req := s.NewRequest("POST", urlPath, dataStr)
 
 	resp, err := s.Client.Do(req)
 	if err != nil {
-		return err
+		return nil, err
 	}
 	body, err := ioutil.ReadAll(resp.Body)
 	if err != nil {
-		return err
+		return nil, err
 	}
 
 	resp.Body.Close()
@@ -99,11 +91,11 @@ func (s *DingdongSession) CheckCapacity() error {
 		result := gjson.Parse(string(body))
 		switch result.Get("code").Str {
 		case "Success":
-			return s.GetCapacity(result)
+			return parseCapacity(result), nil
 		default:
-			return errors.New(result.Get("msg").Str)
+			return nil, errors.New(result.Get("msg").Str)
 		}
 	} else {
-		return errors.New(fmt.Sprintf("[%v] %s", resp.StatusCode, body))
+		return nil, errors.New(fmt.Sprintf("[%v] %s", resp.StatusCode, body))
 	}
 }
