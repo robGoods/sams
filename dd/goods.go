@@ -19,20 +19,21 @@ type Goods struct {
 }
 
 type NormalGoods struct {
-	StoreId       string `json:"storeId"`
-	StoreType     int    `json:"storeType"`
-	SpuId         string `json:"spuId"`
-	SkuId         string `json:"skuId"`
-	BrandId       string `json:"brandId"`
-	GoodsName     string `json:"goodsName"`
-	Price         int    `json:"price"`
-	InvalidReason string `json:"invalidReason"`
-	Quantity      int    `json:"quantity"`
-	StockQuantity int    `json:"stockQuantity"`
-	StockStatus   bool   `json:"stockStatus"`
-	IsPutOnSale   bool   `json:"isPutOnSale"`
-	IsAvailable   bool   `json:"isAvailable"`
-	LimitNum      int    `json:"limitNum"`
+	StoreId            string `json:"storeId"`
+	StoreType          int    `json:"storeType"`
+	SpuId              string `json:"spuId"`
+	SkuId              string `json:"skuId"`
+	BrandId            string `json:"brandId"`
+	GoodsName          string `json:"goodsName"`
+	Price              int    `json:"price"`
+	InvalidReason      string `json:"invalidReason"`
+	Quantity           int    `json:"quantity"`
+	StockQuantity      int    `json:"stockQuantity"`
+	StockStatus        bool   `json:"stockStatus"`
+	IsPutOnSale        bool   `json:"isPutOnSale"`
+	IsAvailable        bool   `json:"isAvailable"`
+	LimitNum           int    `json:"limitNum"`
+	ResiduePurchaseNum int    `json:"residuePurchaseNum"`
 }
 
 func (this NormalGoods) ToGoods() Goods {
@@ -46,27 +47,27 @@ func (this NormalGoods) ToGoods() Goods {
 	}
 }
 
-func parseNormalGoods(g gjson.Result) (error, NormalGoods) {
-	r := NormalGoods{
-		StoreId:       g.Get("storeId").Str,
-		StoreType:     int(g.Get("storeType").Num),
-		SpuId:         g.Get("spuId").Str,
-		SkuId:         g.Get("skuId").Str,
-		BrandId:       g.Get("brandId").Str,
-		GoodsName:     g.Get("goodsName").Str,
-		Price:         int(g.Get("price").Int()),
-		InvalidReason: g.Get("invalidReason").Str,
-		Quantity:      int(g.Get("quantity").Num),
-		StockQuantity: int(g.Get("stockQuantity").Num),
-		StockStatus:   g.Get("stockStatus").Bool(),
-		IsPutOnSale:   g.Get("isPutOnSale").Bool(),
-		IsAvailable:   g.Get("isAvailable").Bool(),
-		LimitNum:      int(g.Get("purchaseLimitVO.limitNum").Int()),
+func parseNormalGoods(g gjson.Result) NormalGoods {
+	return NormalGoods{
+		StoreId:            g.Get("storeId").Str,
+		StoreType:          int(g.Get("storeType").Num),
+		SpuId:              g.Get("spuId").Str,
+		SkuId:              g.Get("skuId").Str,
+		BrandId:            g.Get("brandId").Str,
+		GoodsName:          g.Get("goodsName").Str,
+		Price:              int(g.Get("price").Int()),
+		InvalidReason:      g.Get("invalidReason").Str,
+		Quantity:           int(g.Get("quantity").Num),
+		StockQuantity:      int(g.Get("stockQuantity").Num),
+		StockStatus:        g.Get("stockStatus").Bool(),
+		IsPutOnSale:        g.Get("isPutOnSale").Bool(),
+		IsAvailable:        g.Get("isAvailable").Bool(),
+		LimitNum:           int(g.Get("purchaseLimitVO.limitNum").Int()),
+		ResiduePurchaseNum: int(g.Get("purchaseLimitVO.residuePurchaseNum").Int()),
 	}
-	return nil, r
 }
 
-func (s *DingdongSession) CheckGoods() error {
+func (s *DingdongSession) CheckGoods() (map[string]NormalGoods, error) {
 	urlPath := "https://api-sams.walmartmobile.cn/api/v1/sams/trade/settlement/checkGoodsInfo"
 
 	data := make(map[string]interface{})
@@ -83,11 +84,11 @@ func (s *DingdongSession) CheckGoods() error {
 
 	resp, err := s.Client.Do(req)
 	if err != nil {
-		return err
+		return nil, err
 	}
 	body, err := ioutil.ReadAll(resp.Body)
 	if err != nil {
-		return err
+		return nil, err
 	}
 
 	resp.Body.Close()
@@ -96,19 +97,20 @@ func (s *DingdongSession) CheckGoods() error {
 		switch result.Get("code").Str {
 		case "Success":
 			if result.Get("data.isHasException").Bool() == false {
-				return nil
+				return nil, nil
 			} else {
 				fmt.Println(result.Get("data.popUpInfo.desc").Str)
-				for index, v := range result.Get("data.popUpInfo.goodsList").Array() {
-					_, goods := parseNormalGoods(v)
-					fmt.Printf("[%v] %s 数量：%v 总价：%d\n", index, goods.GoodsName, goods.Quantity, goods.Price)
+				var goods = make(map[string]NormalGoods, 0)
+				for _, v := range result.Get("data.popUpInfo.goodsList").Array() {
+					g := parseNormalGoods(v)
+					goods[g.SpuId] = g
 				}
-				return OOSErr
+				return goods, OOSErr
 			}
 		default:
-			return errors.New(result.Get("msg").Str)
+			return nil, errors.New(result.Get("msg").Str)
 		}
 	} else {
-		return errors.New(fmt.Sprintf("[%v] %s", resp.StatusCode, body))
+		return nil, errors.New(fmt.Sprintf("[%v] %s", resp.StatusCode, body))
 	}
 }

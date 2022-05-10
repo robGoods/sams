@@ -142,6 +142,11 @@ func main() {
 						if goods.LimitNum > 0 && goods.Quantity > goods.LimitNum {
 							goods.Quantity = goods.LimitNum
 						}
+
+						if goods.LimitNum > 0 && goods.Quantity > goods.ResiduePurchaseNum {
+							goods.Quantity = goods.ResiduePurchaseNum
+						}
+
 						session.GoodsList = append(session.GoodsList, goods.ToGoods())
 					}
 				}
@@ -203,15 +208,15 @@ func main() {
 		}
 	GoodsLoop:
 		fmt.Printf("########## 开始校验当前商品【%s】 ###########\n", time.Now().Format("15:04:05"))
-		if err = session.CheckGoods(); err != nil {
+		if _, err := session.CheckGoods(); err != nil {
 			fmt.Println(err)
-			time.Sleep(1 * time.Second)
-			switch err {
-			case dd.OOSErr:
-				goto CartLoop
-			default:
-				goto GoodsLoop
-			}
+			//time.Sleep(1 * time.Second)
+			//switch err {
+			//case dd.OOSErr:
+			//	goto CartLoop
+			//default:
+			//	goto GoodsLoop
+			//}
 		}
 		if err = session.CheckSettleInfo(); err != nil {
 			fmt.Printf("校验商品失败：%s\n", err)

@@ -42,25 +42,21 @@ func parseFloorInfos(g gjson.Result) (error, FloorInfo) {
 		AllOutOfStockGoodsList: make([]NormalGoods, 0),
 	}
 	for _, normalGoods := range g.Get("normalGoodsList").Array() {
-		_, p := parseNormalGoods(normalGoods)
-		r.NormalGoodsList = append(r.NormalGoodsList, p)
+		r.NormalGoodsList = append(r.NormalGoodsList, parseNormalGoods(normalGoods))
 	}
 	for _, promotionGoodsList := range g.Get("promotionFloorGoodsList").Array() {
 		for _, promotionGoods := range promotionGoodsList.Get("promotionGoodsList").Array() {
-			_, p := parseNormalGoods(promotionGoods)
-			r.NormalGoodsList = append(r.NormalGoodsList, p)
+			r.NormalGoodsList = append(r.NormalGoodsList, parseNormalGoods(promotionGoods))
 		}
 	}
 
 	for _, shortageStockGoods := range g.Get("shortageStockGoodsList").Array() {
-		_, p := parseNormalGoods(shortageStockGoods)
-		r.ShortageStockGoodsList = append(r.ShortageStockGoodsList, p)
+		r.ShortageStockGoodsList = append(r.ShortageStockGoodsList, parseNormalGoods(shortageStockGoods))
 	}
 
 	//查询无货商品是否上架
 	for _, outOfStockGoods := range g.Get("allOutOfStockGoodsList").Array() {
-		_, p := parseNormalGoods(outOfStockGoods)
-		r.AllOutOfStockGoodsList = append(r.AllOutOfStockGoodsList, p)
+		r.AllOutOfStockGoodsList = append(r.AllOutOfStockGoodsList, parseNormalGoods(outOfStockGoods))
 	}
 
 	return nil, r
