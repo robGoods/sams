@@ -4,6 +4,9 @@ import (
 	"errors"
 	"flag"
 	"fmt"
+	"github.com/tidwall/gjson"
+	"io"
+	"os"
 	"strings"
 	"time"
 
@@ -24,7 +27,7 @@ var (
 	addressId    = flag.String("addressId", "", "可选，地址id")
 	payMethod    = flag.Int("payMethod", 1, "可选，1,微信 2,支付宝")
 	deliveryFee  = flag.Bool("deliveryFee", false, "可选，是否免运费下单")
-	checkGoods   = flag.Bool("checkGoods", true, "可选，是否校验商品限购")
+	storeConf    = flag.String("storeConf", "", "可选，是否预加载商店信息")
 )
 
 func main() {
@@ -60,7 +63,7 @@ func main() {
 		AddressId:    *addressId,                                //地址
 		PayMethod:    *payMethod,                                //支付方式
 		DeliveryFee:  *deliveryFee,
-		CheckGoods:   *checkGoods,
+		StoreConf:    *storeConf,
 	}
 
 	err := session.InitSession(conf)
@@ -80,6 +83,37 @@ func main() {
 			fmt.Println("切换成功!")
 			fmt.Printf("%s %s %s %s %s \n", session.Address.Name, session.Address.DistrictName, session.Address.ReceiverAddress, session.Address.DetailAddress, session.Address.Mobile)
 		}
+
+		if _, err := os.Stat(session.Conf.StoreConf); err == nil {
+			if file, err := os.Open(session.Conf.StoreConf); err == nil {
+				fmt.Println("########## 预加载商店配置 ###########")
+				var bytes []byte
+				buf := make([]byte, 10)
+				for {
+					n, err := file.Read(buf)
+					if err != nil && err != io.EOF {
+						fmt.Println("read buf fail", err)
+						return
+					}
+					//说明读取结束
+					if n == 0 {
+						break
+					}
+					bytes = append(bytes, buf[:n]...)
+				}
+
+				for index, store := range session.GetStoreList(gjson.ParseBytes(bytes)) {
+					if _, ok := session.StoreList[store.StoreId]; !ok {
+						session.StoreList[store.StoreId] = store
+						fmt.Printf("[%v] Id：%s 名称：%s, 类型 ：%s\n", index, store.StoreId, store.StoreName, store.StoreType)
+					}
+				}
+			} else {
+				fmt.Println(err)
+			}
+		} else {
+			fmt.Println(err)
+		}
 	StoreLoop:
 		fmt.Println("########## 获取地址附近可用商店 ###########")
 		stores, err := session.CheckStore()
@@ -87,18 +121,6 @@ func main() {
 			fmt.Printf("%s", err)
 			goto StoreLoop
 		}
-
-		//商店预加载，可以修改为自己地址附近的商店
-		stores = append(stores, dd.Store{
-			StoreId:                 "6809",
-			StoreName:               "上海唐镇DC",
-			StoreType:               "4",
-			AreaBlockId:             "1203944732519197718",
-			StoreDeliveryTemplateId: "1204037091042941206",
-			DeliveryModeId:          "1009",
-			DeliveryType:            2,
-			Capacity:                &dd.Capacity{},
-		})
 
 		for index, store := range stores {
 			if _, ok := session.StoreList[store.StoreId]; !ok {
@@ -117,7 +139,7 @@ func main() {
 						if goods.StockQuantity <= goods.Quantity {
 							goods.Quantity = goods.StockQuantity
 						}
-						if session.Conf.CheckGoods && goods.LimitNum > 0 && goods.Quantity > goods.LimitNum {
+						if goods.LimitNum > 0 && goods.Quantity > goods.LimitNum {
 							goods.Quantity = goods.LimitNum
 						}
 						session.GoodsList = append(session.GoodsList, goods.ToGoods())
@@ -129,7 +151,7 @@ func main() {
 						if goods.StockQuantity <= goods.Quantity {
 							goods.Quantity = goods.StockQuantity
 						}
-						if session.Conf.CheckGoods && goods.LimitNum > 0 && goods.Quantity > goods.LimitNum {
+						if goods.LimitNum > 0 && goods.Quantity > goods.LimitNum {
 							goods.Quantity = goods.LimitNum
 						}
 						session.GoodsList = append(session.GoodsList, goods.ToGoods())
@@ -142,7 +164,7 @@ func main() {
 							goods.Quantity = goods.StockQuantity
 						}
 
-						if session.Conf.CheckGoods && goods.LimitNum > 0 && goods.Quantity > goods.LimitNum {
+						if goods.LimitNum > 0 && goods.Quantity > goods.LimitNum {
 							goods.Quantity = goods.LimitNum
 						}
 
@@ -181,16 +203,14 @@ func main() {
 		}
 	GoodsLoop:
 		fmt.Printf("########## 开始校验当前商品【%s】 ###########\n", time.Now().Format("15:04:05"))
-		if session.Conf.CheckGoods {
-			if err = session.CheckGoods(); err != nil {
-				fmt.Println(err)
-				time.Sleep(1 * time.Second)
-				switch err {
-				case dd.OOSErr:
-					goto CartLoop
-				default:
-					goto GoodsLoop
-				}
+		if err = session.CheckGoods(); err != nil {
+			fmt.Println(err)
+			time.Sleep(1 * time.Second)
+			switch err {
+			case dd.OOSErr:
+				goto CartLoop
+			default:
+				goto GoodsLoop
 			}
 		}
 		if err = session.CheckSettleInfo(); err != nil {

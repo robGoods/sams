@@ -24,7 +24,7 @@ type Config struct {
 	AddressId    string
 	PayMethod    int //支付方式
 	DeliveryFee  bool
-	CheckGoods   bool
+	StoreConf    string
 }
 
 type DingdongSession struct {
