@@ -10,30 +10,32 @@ import (
 )
 
 type Goods struct {
-	GoodsName  string `json:"-"`
-	Price      int    `json:"-"`
-	IsSelected bool   `json:"isSelected"`
-	Quantity   int    `json:"quantity"`
-	SpuId      string `json:"spuId"`
-	StoreId    string `json:"storeId"`
+	GoodsName  string  `json:"-"`
+	Price      int     `json:"-"`
+	IsSelected bool    `json:"isSelected"`
+	Quantity   int     `json:"quantity"`
+	SpuId      string  `json:"spuId"`
+	StoreId    string  `json:"storeId"`
+	Weight     float64 `json:"-"`
 }
 
 type NormalGoods struct {
-	StoreId            string `json:"storeId"`
-	StoreType          int    `json:"storeType"`
-	SpuId              string `json:"spuId"`
-	SkuId              string `json:"skuId"`
-	BrandId            string `json:"brandId"`
-	GoodsName          string `json:"goodsName"`
-	Price              int    `json:"price"`
-	InvalidReason      string `json:"invalidReason"`
-	Quantity           int    `json:"quantity"`
-	StockQuantity      int    `json:"stockQuantity"`
-	StockStatus        bool   `json:"stockStatus"`
-	IsPutOnSale        bool   `json:"isPutOnSale"`
-	IsAvailable        bool   `json:"isAvailable"`
-	LimitNum           int    `json:"limitNum"`
-	ResiduePurchaseNum int    `json:"residuePurchaseNum"`
+	StoreId            string  `json:"storeId"`
+	StoreType          int     `json:"storeType"`
+	SpuId              string  `json:"spuId"`
+	SkuId              string  `json:"skuId"`
+	BrandId            string  `json:"brandId"`
+	GoodsName          string  `json:"goodsName"`
+	Price              int     `json:"price"`
+	InvalidReason      string  `json:"invalidReason"`
+	Quantity           int     `json:"quantity"`
+	StockQuantity      int     `json:"stockQuantity"`
+	StockStatus        bool    `json:"stockStatus"`
+	IsPutOnSale        bool    `json:"isPutOnSale"`
+	IsAvailable        bool    `json:"isAvailable"`
+	LimitNum           int     `json:"limitNum"`
+	ResiduePurchaseNum int     `json:"residuePurchaseNum"`
+	Weight             float64 `json:"-"`
 }
 
 func (this NormalGoods) ToGoods() Goods {
@@ -44,6 +46,7 @@ func (this NormalGoods) ToGoods() Goods {
 		Quantity:   this.Quantity,
 		SpuId:      this.SpuId,
 		StoreId:    this.StoreId,
+		Weight:     this.Weight,
 	}
 }
 
@@ -64,6 +67,7 @@ func parseNormalGoods(g gjson.Result) NormalGoods {
 		IsAvailable:        g.Get("isAvailable").Bool(),
 		LimitNum:           int(g.Get("purchaseLimitVO.limitNum").Int()),
 		ResiduePurchaseNum: int(g.Get("purchaseLimitVO.residuePurchaseNum").Int()),
+		Weight:             g.Get("weight").Float(),
 	}
 }
 

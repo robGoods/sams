@@ -12,5 +12,6 @@ var NotDeliverCapCityErr = errors.New("当前配送时间段已约满，请重�
 var DecreaseCapacityCountError = errors.New("扣减运力失败")
 var StoreHasClosedError = errors.New("门店已打烊")
 var PreGoodNotStartSellErr = errors.New("商品还未开始正式售卖，无法购买")
+var CloudGoodsOverWightErr = errors.New("出于交通安全考虑，极速达订单限重30公斤，您的订单已超重，请分开下单")
 
 var OOSErr = errors.New("部分商品已缺货")

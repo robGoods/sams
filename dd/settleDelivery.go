@@ -50,7 +50,7 @@ type SettleInfo struct {
 	DeliveryAddress Address        `json:"deliveryAddress"`
 }
 
-func (s *DingdongSession) GetSettleInfo(result gjson.Result) error {
+func parseSettleInfo(result gjson.Result) *SettleInfo {
 	r := SettleInfo{}
 
 	for _, v := range result.Get("data.settleDelivery").Array() {
@@ -68,8 +68,7 @@ func (s *DingdongSession) GetSettleInfo(result gjson.Result) error {
 		r.DeliveryAddress = address
 	}
 
-	s.SettleInfo = r
-	return nil
+	return &r
 }
 
 type StoreInfo struct {
@@ -101,7 +100,7 @@ type SettleParam struct {
 	GoodsList      []Goods        `json:"goodsList"`
 }
 
-func (s *DingdongSession) CheckSettleInfo() error {
+func (s *DingdongSession) CheckSettleInfo() (*SettleInfo, error) {
 	urlPath := "https://api-sams.walmartmobile.cn/api/v1/sams/trade/settlement/getSettleInfo"
 
 	data := SettleParam{
@@ -126,28 +125,28 @@ func (s *DingdongSession) CheckSettleInfo() error {
 
 	resp, err := s.Client.Do(req)
 	if err != nil {
-		return err
+		return nil, err
 	}
 	body, err := ioutil.ReadAll(resp.Body)
 	if err != nil {
-		return err
+		return nil, err
 	}
 	resp.Body.Close()
 	if resp.StatusCode == 200 {
 		result := gjson.Parse(string(body))
 		switch result.Get("code").Str {
 		case "Success":
-			return s.GetSettleInfo(result)
+			return parseSettleInfo(result), nil
 		case "LIMITED":
-			return LimitedErr
+			return nil, LimitedErr
 		case "NO_MATCH_DELIVERY_MODE":
-			return NoMatchDeliverMode
+			return nil, NoMatchDeliverMode
 		case "CART_GOOD_CHANGE":
-			return CartGoodChangeErr
+			return nil, CartGoodChangeErr
 		default:
-			return errors.New(result.Get("msg").Str)
+			return nil, errors.New(result.Get("msg").Str)
 		}
 	} else {
-		return errors.New(fmt.Sprintf("[%v] %s", resp.StatusCode, body))
+		return nil, errors.New(fmt.Sprintf("[%v] %s", resp.StatusCode, body))
 	}
 }

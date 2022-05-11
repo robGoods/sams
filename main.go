@@ -147,7 +147,9 @@ func main() {
 							goods.Quantity = goods.ResiduePurchaseNum
 						}
 
-						session.GoodsList = append(session.GoodsList, goods.ToGoods())
+						if goods.Quantity > 0 {
+							session.GoodsList = append(session.GoodsList, goods.ToGoods())
+						}
 					}
 				}
 
@@ -159,7 +161,13 @@ func main() {
 						if goods.LimitNum > 0 && goods.Quantity > goods.LimitNum {
 							goods.Quantity = goods.LimitNum
 						}
-						session.GoodsList = append(session.GoodsList, goods.ToGoods())
+						if goods.LimitNum > 0 && goods.Quantity > goods.ResiduePurchaseNum {
+							goods.Quantity = goods.ResiduePurchaseNum
+						}
+
+						if goods.Quantity > 0 {
+							session.GoodsList = append(session.GoodsList, goods.ToGoods())
+						}
 					}
 				}
 
@@ -173,7 +181,13 @@ func main() {
 							goods.Quantity = goods.LimitNum
 						}
 
-						session.GoodsList = append(session.GoodsList, goods.ToGoods())
+						if goods.LimitNum > 0 && goods.Quantity > goods.ResiduePurchaseNum {
+							goods.Quantity = goods.ResiduePurchaseNum
+						}
+
+						if goods.Quantity > 0 {
+							session.GoodsList = append(session.GoodsList, goods.ToGoods())
+						}
 					}
 				}
 
@@ -218,7 +232,12 @@ func main() {
 			//	goto GoodsLoop
 			//}
 		}
-		if err = session.CheckSettleInfo(); err != nil {
+		if settleInfo, err := session.CheckSettleInfo(); err == nil {
+			fmt.Printf("运费： %s\n", settleInfo.DeliveryFee)
+			if session.Conf.DeliveryFee && settleInfo.DeliveryFee != "0" {
+				goto CartLoop
+			}
+		} else {
 			fmt.Printf("校验商品失败：%s\n", err)
 			time.Sleep(1 * time.Second)
 			switch err {
@@ -230,11 +249,6 @@ func main() {
 				goto SaveDeliveryAddress
 			default:
 				goto GoodsLoop
-			}
-		} else {
-			fmt.Printf("运费： %s\n", session.SettleInfo.DeliveryFee)
-			if session.Conf.DeliveryFee && session.SettleInfo.DeliveryFee != "0" {
-				goto CartLoop
 			}
 		}
 	CapacityLoop:
@@ -274,12 +288,11 @@ func main() {
 			for k, v := range session.SettleDeliveryInfo {
 				fmt.Printf("########## 提交订单中【%s】 ###########\n", time.Now().Format("15:04:05"))
 				fmt.Printf("配送时段: %s!\n", v.ArrivalTimeStr)
-				err = session.CommitPay(v)
-				if err == nil {
+				if order, err := session.CommitPay(v); err == nil {
 					fmt.Println("抢购成功，请前往app付款！")
 					if session.Conf.BarkId != "" {
 						for true {
-							err = session.PushSuccess(fmt.Sprintf("Smas抢单成功，订单号：%s", session.OrderInfo.OrderNo))
+							err = session.PushSuccess(fmt.Sprintf("Smas抢单成功，订单号：%s", order.OrderNo))
 							if err == nil {
 								break
 							} else {
@@ -294,6 +307,8 @@ func main() {
 					switch err {
 					case dd.LimitedErr1:
 						fmt.Println("立即重试...")
+						goto OrderLoop
+					case dd.CloudGoodsOverWightErr:
 						goto OrderLoop
 					case dd.OOSErr, dd.PreGoodNotStartSellErr, dd.CartGoodChangeErr, dd.GoodsExceedLimitErr:
 						goto CartLoop

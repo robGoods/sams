@@ -35,7 +35,7 @@ type CommitPayPram struct {
 	PayMethodId        string              `json:"payMethodId"`
 }
 
-type OrderInfo struct {
+type Order struct {
 	IsSuccess bool    `json:"isSuccess"`
 	OrderNo   string  `json:"orderNo"`
 	PayAmount string  `json:"payAmount"`
@@ -56,8 +56,8 @@ type SettleDeliveryInfo struct {
 	ArrivalTimeStr       string `json:"-"`
 }
 
-func (s *DingdongSession) GetOrderInfo(result gjson.Result) error {
-	s.OrderInfo = OrderInfo{
+func (s *DingdongSession) GetOrderInfo(result gjson.Result) *Order {
+	return &Order{
 		IsSuccess: result.Get("data.isSuccess").Bool(),
 		OrderNo:   result.Get("data.orderNo").Str,
 		PayAmount: result.Get("data.payAmount").Str,
@@ -68,17 +68,16 @@ func (s *DingdongSession) GetOrderInfo(result gjson.Result) error {
 			TotalAmt:   int(result.Get("data.PayInfo.TotalAmt").Num),
 		},
 	}
-	return nil
 }
 
-func (s *DingdongSession) CommitPay(info SettleDeliveryInfo) error {
+func (s *DingdongSession) CommitPay(info SettleDeliveryInfo) (*Order, error) {
 	urlPath := "https://api-sams.walmartmobile.cn/api/v1/sams/trade/settlement/commitPay"
 
 	data := CommitPayPram{
 		GoodsList:          s.GoodsList,
 		InvoiceInfo:        make(map[int]interface{}),
 		DeliveryType:       s.Conf.DeliveryType, // 1,急速到达 2,全城配送
-		FloorId:            s.SettleInfo.FloorId,
+		FloorId:            s.Conf.FloorId,
 		Amount:             s.FloorInfo.Amount,
 		PurchaserName:      "",
 		SettleDeliveryInfo: info,
@@ -91,7 +90,7 @@ func (s *DingdongSession) CommitPay(info SettleDeliveryInfo) error {
 		IsSelfPickup:       0,
 		OrderType:          0,
 		CouponList:         make([]CouponInfo, 0),
-		Uid:                s.SettleInfo.Uid, //s.Uid,
+		Uid:                s.Uid,
 		AppId:              fmt.Sprintf("wx51394321bc03adfadf"),
 		AddressId:          s.Address.AddressId,
 		DeliveryInfoVO:     s.DeliveryInfoVO,
@@ -109,17 +108,17 @@ func (s *DingdongSession) CommitPay(info SettleDeliveryInfo) error {
 
 	dataStr, err := json.Marshal(data)
 	if err != nil {
-		return err
+		return nil, err
 	}
 	req := s.NewRequest("POST", urlPath, dataStr)
 	req.Header.Set("track-info", s.Conf.Trackinfo)
 	resp, err := s.Client.Do(req)
 	if err != nil {
-		return err
+		return nil, err
 	}
 	body, err := ioutil.ReadAll(resp.Body)
 	if err != nil {
-		return err
+		return nil, err
 	}
 
 	resp.Body.Close()
@@ -128,31 +127,34 @@ func (s *DingdongSession) CommitPay(info SettleDeliveryInfo) error {
 		switch result.Get("code").Str {
 		case "Success":
 			if result.Get("data.isSuccess").Bool() {
-				return s.GetOrderInfo(result)
+				return s.GetOrderInfo(result), nil
+			} else {
+				return nil, errors.New(result.Get("data.failReason").Str)
 			}
-			return errors.New(result.Get("data.failReason").Str)
 		case "LIMITED":
-			return LimitedErr1
+			return nil, LimitedErr1
 		case "GOODS_EXCEED_LIMIT":
-			return GoodsExceedLimitErr
+			return nil, GoodsExceedLimitErr
 		case "CLOSE_ORDER_TIME_EXCEPTION":
-			return CloseOrderTimeExceptionErr
+			return nil, CloseOrderTimeExceptionErr
 		case "DECREASE_CAPACITY_COUNT_ERROR":
-			return DecreaseCapacityCountError
+			return nil, DecreaseCapacityCountError
 		case "OUT_OF_STOCK":
-			return OOSErr
+			return nil, OOSErr
 		case "NOT_DELIVERY_CAPACITY_ERROR":
-			return NotDeliverCapCityErr
+			return nil, NotDeliverCapCityErr
 		case "STORE_HAS_CLOSED":
-			return StoreHasClosedError
+			return nil, StoreHasClosedError
 		case "PRE_GOOD_NOT_START_SELL":
-			return PreGoodNotStartSellErr
+			return nil, PreGoodNotStartSellErr
+		case "CLOUD_GOODS_OVER_WEIGHT":
+			return nil, CloudGoodsOverWightErr
 		case "CART_GOOD_CHANGE":
-			return CartGoodChangeErr
+			return nil, CartGoodChangeErr
 		default:
-			return errors.New(result.Get("msg").Str)
+			return nil, errors.New(result.Get("msg").Str)
 		}
 	} else {
-		return errors.New(fmt.Sprintf("[%v] %s", resp.StatusCode, body))
+		return nil, errors.New(fmt.Sprintf("[%v] %s", resp.StatusCode, body))
 	}
 }
