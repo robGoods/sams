@@ -26,20 +26,6 @@ go run main.go --authToken=xxxxx
 1. 支付方式，收货地址均支持`flag`模式选择，而非`Stdin`模式，默认微信支付，地址未指定时依旧会提示选择
 1. 优惠券支持多张同时使用，使用前最好确认下订单是否满足使用类型
 
-#### 商店预加载
-
-例如：
-
-急速达店铺，会在早上八点才开始营业，但是开始营业之前店员需要添加库存信息，所以店铺未开之前，库存实际已经有了。通过预加载商品信息可以在店铺开业前预选查询出库存和运力进行下单。
-
-预加载的信息获取接口：
-
-```sh
-curl --location --request POST 'https://api-sams.walmartmobile.cn/api/v1/sams/merchant/storeApi/getRecommendStoreListByLocation' --header 'auth-token: xxxxxx' --header 'Content-Type: application/json' --data-raw '{"longitude": "xxxxxxx","latitude": "xxxxxx"}'//token,longitude,latitude更换位自己的信息 
-```
-
-将获取到的商店信息保存下来，运行时选择`-storeConf=xxx`即可 
-
 #### 参数说明
 
 ```sh
