@@ -34,9 +34,9 @@ go run main.go --authToken=xxxxx
 
 预加载的信息获取接口：
 
-`sh
+```sh
 curl --location --request POST 'https://api-sams.walmartmobile.cn/api/v1/sams/merchant/storeApi/getRecommendStoreListByLocation' --header 'auth-token: xxxxxx' --header 'Content-Type: application/json' --data-raw '{"longitude": "xxxxxxx","latitude": "xxxxxx"}'//token,longitude,latitude更换位自己的信息 
-`
+```
 
 将获取到的商店信息保存下来，运行时选择`-storeConf=xxx`即可 
 
