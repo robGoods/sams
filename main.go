@@ -27,7 +27,7 @@ var (
 	addressId    = flag.String("addressId", "", "可选，地址id")
 	payMethod    = flag.Int("payMethod", 1, "可选，1,微信 2,支付宝")
 	deliveryFee  = flag.Bool("deliveryFee", false, "可选，是否免运费下单")
-	storeConf    = flag.String("storeConf", "", "可选，是否预加载商店信息")
+	storeConf    = flag.String("storeConf", "", "可选，加载商店信息文件名")
 )
 
 func main() {
@@ -84,35 +84,37 @@ func main() {
 			fmt.Printf("%s %s %s %s %s \n", session.Address.Name, session.Address.DistrictName, session.Address.ReceiverAddress, session.Address.DetailAddress, session.Address.Mobile)
 		}
 
-		if _, err := os.Stat(session.Conf.StoreConf); err == nil {
-			if file, err := os.Open(session.Conf.StoreConf); err == nil {
-				fmt.Println("########## 预加载商店配置 ###########")
-				var bytes []byte
-				buf := make([]byte, 10)
-				for {
-					n, err := file.Read(buf)
-					if err != nil && err != io.EOF {
-						fmt.Println("read buf fail", err)
-						return
+		if session.Conf.StoreConf != "" {
+			if _, err := os.Stat(session.Conf.StoreConf); err == nil {
+				if file, err := os.Open(session.Conf.StoreConf); err == nil {
+					fmt.Println("########## 预加载商店配置 ###########")
+					var bytes []byte
+					buf := make([]byte, 10)
+					for {
+						n, err := file.Read(buf)
+						if err != nil && err != io.EOF {
+							fmt.Println("read buf fail", err)
+							return
+						}
+						//说明读取结束
+						if n == 0 {
+							break
+						}
+						bytes = append(bytes, buf[:n]...)
 					}
-					//说明读取结束
-					if n == 0 {
-						break
-					}
-					bytes = append(bytes, buf[:n]...)
-				}
 
-				for index, store := range session.GetStoreList(gjson.ParseBytes(bytes)) {
-					if _, ok := session.StoreList[store.StoreId]; !ok {
-						session.StoreList[store.StoreId] = store
-						fmt.Printf("[%v] Id：%s 名称：%s, 类型 ：%s\n", index, store.StoreId, store.StoreName, store.StoreType)
+					for index, store := range session.GetStoreList(gjson.ParseBytes(bytes)) {
+						if _, ok := session.StoreList[store.StoreId]; !ok {
+							session.StoreList[store.StoreId] = store
+							fmt.Printf("[%v] Id：%s 名称：%s, 类型 ：%s\n", index, store.StoreId, store.StoreName, store.StoreType)
+						}
 					}
+				} else {
+					fmt.Println(err)
 				}
 			} else {
 				fmt.Println(err)
 			}
-		} else {
-			fmt.Println(err)
 		}
 	StoreLoop:
 		fmt.Println("########## 获取地址附近可用商店 ###########")
@@ -224,13 +226,13 @@ func main() {
 		fmt.Printf("########## 开始校验当前商品【%s】 ###########\n", time.Now().Format("15:04:05"))
 		if _, err := session.CheckGoods(); err != nil {
 			fmt.Println(err)
-			//time.Sleep(1 * time.Second)
-			//switch err {
-			//case dd.OOSErr:
-			//	goto CartLoop
-			//default:
-			//	goto GoodsLoop
-			//}
+			time.Sleep(1 * time.Second)
+			switch err {
+			case dd.OOSErr:
+				goto CartLoop
+			default:
+				goto GoodsLoop
+			}
 		}
 		if settleInfo, err := session.CheckSettleInfo(); err == nil {
 			fmt.Printf("运费： %s\n", settleInfo.DeliveryFee)
@@ -309,6 +311,14 @@ func main() {
 						fmt.Println("立即重试...")
 						goto OrderLoop
 					case dd.CloudGoodsOverWightErr:
+						lastKey := len(session.GoodsList) - 1
+						if lastKey >= 0 {
+							if session.GoodsList[lastKey].Quantity > 1 {
+								session.GoodsList[lastKey].Quantity -= 1
+							} else {
+								session.GoodsList = session.GoodsList[0:lastKey]
+							}
+						}
 						goto OrderLoop
 					case dd.OOSErr, dd.PreGoodNotStartSellErr, dd.CartGoodChangeErr, dd.GoodsExceedLimitErr:
 						goto CartLoop
