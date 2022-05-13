@@ -35,12 +35,13 @@ type NormalGoods struct {
 	IsAvailable        bool    `json:"isAvailable"`
 	LimitNum           int     `json:"limitNum"`
 	ResiduePurchaseNum int     `json:"residuePurchaseNum"`
+	IsSelected         bool    `json:"IsSelected"`
 	Weight             float64 `json:"-"`
 }
 
 func (this NormalGoods) ToGoods() Goods {
 	return Goods{
-		IsSelected: true,
+		IsSelected: this.IsSelected,
 		GoodsName:  this.GoodsName,
 		Price:      this.Price,
 		Quantity:   this.Quantity,
@@ -67,6 +68,7 @@ func parseNormalGoods(g gjson.Result) NormalGoods {
 		IsAvailable:        g.Get("isAvailable").Bool(),
 		LimitNum:           int(g.Get("purchaseLimitVO.limitNum").Int()),
 		ResiduePurchaseNum: int(g.Get("purchaseLimitVO.residuePurchaseNum").Int()),
+		IsSelected:         g.Get("isSelected").Bool(),
 		Weight:             g.Get("weight").Float(),
 	}
 }

@@ -48,6 +48,8 @@ Usage of ./sams:
     	可选，1,普通商品 2,全球购保税 3,特殊订购自提 4,大件商品 5,厂家直供商品 6,特殊订购商品 7,失效商品 (default 1)
   -help
     	show help
+  -isSelected
+        可选，是否只选择勾选商品
   -latitude string
     	可选，HTTP头部latitude
   -longitude string
@@ -58,7 +60,7 @@ Usage of ./sams:
     	可选，优惠券id,多个用逗号隔开，山姆app优惠券列表接口中的'ruleId'字段
   -addressId string
     	可选，地址id
--storeConf string
+  -storeConf string
         可选，是否预加载商店信息文件名
   -trackInfo string
     	可选，HTTP头部track-info

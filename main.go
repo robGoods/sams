@@ -28,6 +28,7 @@ var (
 	payMethod    = flag.Int("payMethod", 1, "可选，1,微信 2,支付宝")
 	deliveryFee  = flag.Bool("deliveryFee", false, "可选，是否免运费下单")
 	storeConf    = flag.String("storeConf", "", "可选，加载商店信息文件名")
+	isSelected   = flag.Bool("isSelected", false, "可选，是否只选择勾选商品")
 )
 
 func main() {
@@ -64,6 +65,7 @@ func main() {
 		PayMethod:    *payMethod,                                //支付方式
 		DeliveryFee:  *deliveryFee,
 		StoreConf:    *storeConf,
+		IsSelected:   *isSelected,
 	}
 
 	err := session.InitSession(conf)
@@ -125,7 +127,7 @@ func main() {
 		}
 
 		for index, store := range stores {
-			if _, ok := session.StoreList[store.StoreId]; !ok {
+			if oStore, ok := session.StoreList[store.StoreId]; !ok || oStore.StoreDeliveryTemplateId != store.StoreDeliveryTemplateId || oStore.AreaBlockId != store.AreaBlockId {
 				session.StoreList[store.StoreId] = store
 				fmt.Printf("[%v] Id：%s 名称：%s, 类型 ：%s\n", index, store.StoreId, store.StoreName, store.StoreType)
 			}
@@ -207,8 +209,16 @@ func main() {
 			}
 		}
 
+		var selGoods = make([]dd.Goods, 0)
 		for index, goods := range session.GoodsList {
-			fmt.Printf("[%v] %s 数量：%v 总价：%d\n", index, goods.GoodsName, goods.Quantity, goods.Price)
+			fmt.Printf("[%v] %s 数量：%v 总价：%d, 是否勾选： %v \n", index, goods.GoodsName, goods.Quantity, goods.Price, goods.IsSelected)
+			if goods.IsSelected && session.Conf.IsSelected {
+				selGoods = append(selGoods, goods)
+			}
+		}
+
+		if session.Conf.IsSelected {
+			session.GoodsList = selGoods
 		}
 
 		if len(session.GoodsList) == 0 {
