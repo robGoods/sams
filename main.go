@@ -311,12 +311,17 @@ func main() {
 						fmt.Println("立即重试...")
 						goto OrderLoop
 					case dd.CloudGoodsOverWightErr:
-						lastKey := len(session.GoodsList) - 1
-						if lastKey >= 0 {
-							if session.GoodsList[lastKey].Quantity > 1 {
-								session.GoodsList[lastKey].Quantity -= 1
+						maxKey := len(session.GoodsList) - 1
+						for key, v := range session.GoodsList {
+							if v.Quantity > 1 && v.Weight > session.GoodsList[maxKey].Weight {
+								maxKey = key
+							}
+						}
+						if maxKey >= 0 {
+							if session.GoodsList[maxKey].Quantity > 1 {
+								session.GoodsList[maxKey].Quantity -= 1
 							} else {
-								session.GoodsList = session.GoodsList[0:lastKey]
+								session.GoodsList = append(session.GoodsList[:maxKey], session.GoodsList[maxKey+1:]...)
 							}
 						}
 						goto OrderLoop
