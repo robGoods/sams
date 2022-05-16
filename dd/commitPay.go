@@ -85,7 +85,7 @@ func (s *DingdongSession) CommitPay(info SettleDeliveryInfo) (*Order, error) {
 		PurchaserId:        "",
 		PayType:            0,
 		Currency:           "CNY",
-		Channel:            s.Channel,
+		Channel:            "wechat",
 		ShortageId:         1,
 		IsSelfPickup:       0,
 		OrderType:          0,
@@ -98,6 +98,10 @@ func (s *DingdongSession) CommitPay(info SettleDeliveryInfo) (*Order, error) {
 		StoreInfo:          s.FloorInfo.StoreInfo,
 		ShortageDesc:       "其他商品继续配送（缺货商品直接退款）",
 		PayMethodId:        "1486659732",
+	}
+
+	if s.Conf.PayMethod == 2 {
+		data.Channel = "alipay"
 	}
 
 	if len(s.Conf.PromotionId) > 0 {

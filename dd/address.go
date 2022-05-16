@@ -54,7 +54,6 @@ func (s *DingdongSession) GetAddress() (error, []Address) {
 	}
 	resp.Body.Close()
 	if resp.StatusCode == 200 {
-
 		result := gjson.Parse(string(body))
 		switch result.Get("code").Str {
 		case "Success":

@@ -33,7 +33,6 @@ type DingdongSession struct {
 	Address            Address                    `json:"address"`
 	Uid                string                     `json:"uid"`
 	Capacity           Capacity                   `json:"capacity"`
-	Channel            string                     `json:"channel"` //0 => wechat  1 =>alipay
 	DeliveryInfoVO     DeliveryInfoVO             `json:"deliveryInfoVO"`
 	SettleDeliveryInfo map[int]SettleDeliveryInfo `json:"settleDeliveryInfo"`
 	GoodsList          []Goods                    `json:"goods"`
@@ -65,7 +64,6 @@ func (s *DingdongSession) InitSession(conf Config) error {
 	if len(addrList) == 0 {
 		return errors.New("未查询到有效收货地址，请前往app添加或检查cookie是否正确！")
 	}
-	var index int
 	if s.Conf.AddressId != "" {
 		for _, v := range addrList {
 			if v.AddressId == s.Conf.AddressId {
@@ -77,9 +75,10 @@ func (s *DingdongSession) InitSession(conf Config) error {
 	if s.Address.AddressId == "" {
 		fmt.Println("########## 选择收货地址 ##########")
 		for i, addr := range addrList {
-			fmt.Printf("[%v] %s %s %s %s %s \n", i, addr.Name, addr.DistrictName, addr.ReceiverAddress, addr.DetailAddress, addr.Mobile)
+			fmt.Printf("[%v] Id: %s %s %s %s %s %s \n", i, addr.AddressId, addr.Name, addr.DistrictName, addr.ReceiverAddress, addr.DetailAddress, addr.Mobile)
 		}
 
+		var index int
 		for true {
 			fmt.Println("请输入地址序号（0, 1, 2...)：")
 			_, err := fmt.Fscanln(stdin, &index)
@@ -98,10 +97,8 @@ func (s *DingdongSession) InitSession(conf Config) error {
 	switch s.Conf.PayMethod {
 	case 1:
 		fmt.Println("支付方式 : wechat ")
-		s.Channel = "wechat"
 	case 2:
 		fmt.Println("支付方式 : alipay ")
-		s.Channel = "alipay"
 	default:
 		return errors.New("选择支付方式有误！")
 	}
