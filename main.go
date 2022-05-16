@@ -15,7 +15,7 @@ import (
 
 var (
 	showHelp     = flag.Bool("help", false, "show help")
-	version      = flag.Bool("version", false, "-version")
+	version      = flag.Bool("version", false, "查看版本号")
 	authToken    = flag.String("authToken", "", "必选, Sam's App HTTP头部auth-token")
 	barkId       = flag.String("barkId", "", "可选，通知用的`bark` id, 可选参数")
 	floorId      = flag.Int("floorId", 1, "可选，1,普通商品 2,全球购保税 3,特殊订购自提 4,大件商品 5,厂家直供商品 6,特殊订购商品 7,失效商品")
@@ -34,13 +34,13 @@ var (
 
 func main() {
 	flag.Parse()
-	if *showHelp {
-		flag.Usage()
+	if *version {
+		fmt.Println("Rob Sam's 1.5.1 GNU General Public License v3.0")
 		return
 	}
 
-	if *version {
-		fmt.Println("Rob Sam's 1.5.1 GNU General Public License v3.0")
+	if *showHelp {
+		flag.Usage()
 		return
 	}
 
