@@ -10,7 +10,6 @@ import (
 )
 
 type Cart struct {
-	DeliveryAddress Address     `json:"deliveryAddress"`
 	FloorInfoList   []FloorInfo `json:"floorInfoList"`
 	ParentOrderSign string      `json:"parent_order_sign"`
 }
@@ -22,21 +21,15 @@ type FloorInfo struct {
 	AllOutOfStockGoodsList []NormalGoods `json:"allOutOfStockGoodsList"`
 	Amount                 string        `json:"amount"`
 	Quantity               int           `json:"quantity"`
-	StoreInfo              StoreInfo     `json:"storeInfo"`
+	StoreId                string        `json:"storeId"`
 }
 
 func parseFloorInfos(g gjson.Result) (error, FloorInfo) {
 	r := FloorInfo{
-		FloorId:  int(g.Get("floorId").Num),
-		Amount:   g.Get("amount").Str,
-		Quantity: int(g.Get("quantity").Num),
-		StoreInfo: StoreInfo{
-			StoreId:                 g.Get("storeInfo.storeId").Str,
-			StoreType:               fmt.Sprintf("%d", int(g.Get("storeInfo.storeType").Num)),
-			AreaBlockId:             g.Get("storeInfo.areaBlockId").Str,
-			StoreDeliveryTemplateId: g.Get("storeInfo.storeDeliveryTemplateId").Str,
-			DeliveryModeId:          g.Get("storeInfo.deliveryModeId").Str,
-		},
+		FloorId:                int(g.Get("floorId").Num),
+		Amount:                 g.Get("amount").Str,
+		Quantity:               int(g.Get("quantity").Num),
+		StoreId:                g.Get("storeId").Str,
 		NormalGoodsList:        make([]NormalGoods, 0),
 		ShortageStockGoodsList: make([]NormalGoods, 0),
 		AllOutOfStockGoodsList: make([]NormalGoods, 0),
@@ -69,10 +62,7 @@ func (s *DingdongSession) GetCart(result gjson.Result) error {
 		_, floor := parseFloorInfos(v)
 		c.FloorInfoList = append(c.FloorInfoList, floor)
 	}
-	address, err := parseAddress(result.Get("data.deliveryAddress"))
-	if err == nil {
-		c.DeliveryAddress = address
-	}
+
 	s.Cart = c
 	return nil
 }

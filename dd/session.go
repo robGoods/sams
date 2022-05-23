@@ -33,7 +33,6 @@ type DingdongSession struct {
 	Address            Address                    `json:"address"`
 	Uid                string                     `json:"uid"`
 	Capacity           Capacity                   `json:"capacity"`
-	DeliveryInfoVO     DeliveryInfoVO             `json:"deliveryInfoVO"`
 	SettleDeliveryInfo map[int]SettleDeliveryInfo `json:"settleDeliveryInfo"`
 	GoodsList          []Goods                    `json:"goods"`
 	FloorInfo          FloorInfo                  `json:"floorInfo"`

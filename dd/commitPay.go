@@ -30,7 +30,7 @@ type CommitPayPram struct {
 	AddressId          string              `json:"addressId"`
 	DeliveryInfoVO     DeliveryInfoVO      `json:"deliveryInfoVO"`
 	Remark             string              `json:"remark"`
-	StoreInfo          StoreInfo           `json:"storeInfo"`
+	StoreInfo          Store               `json:"storeInfo"`
 	ShortageDesc       string              `json:"shortageDesc"`
 	PayMethodId        string              `json:"payMethodId"`
 }
@@ -93,11 +93,15 @@ func (s *DingdongSession) CommitPay(info SettleDeliveryInfo) (*Order, error) {
 		Uid:                s.Uid,
 		AppId:              fmt.Sprintf("wx51394321bc03adfadf"),
 		AddressId:          s.Address.AddressId,
-		DeliveryInfoVO:     s.DeliveryInfoVO,
-		Remark:             "",
-		StoreInfo:          s.FloorInfo.StoreInfo,
-		ShortageDesc:       "其他商品继续配送（缺货商品直接退款）",
-		PayMethodId:        "1486659732",
+		DeliveryInfoVO: DeliveryInfoVO{
+			StoreDeliveryTemplateId: s.StoreList[s.FloorInfo.StoreId].StoreDeliveryTemplateId,
+			DeliveryModeId:          s.StoreList[s.FloorInfo.StoreId].DeliveryModeId,
+			StoreType:               s.StoreList[s.FloorInfo.StoreId].StoreType,
+		},
+		Remark:       "",
+		StoreInfo:    s.StoreList[s.FloorInfo.StoreId],
+		ShortageDesc: "其他商品继续配送（缺货商品直接退款）",
+		PayMethodId:  "1486659732",
 	}
 
 	if s.Conf.PayMethod == 2 {
@@ -106,7 +110,7 @@ func (s *DingdongSession) CommitPay(info SettleDeliveryInfo) (*Order, error) {
 
 	if len(s.Conf.PromotionId) > 0 {
 		for _, id := range s.Conf.PromotionId {
-			data.CouponList = append(data.CouponList, CouponInfo{PromotionId: id, StoreId: s.FloorInfo.StoreInfo.StoreId})
+			data.CouponList = append(data.CouponList, CouponInfo{PromotionId: id, StoreId: s.FloorInfo.StoreId})
 		}
 	}
 
@@ -124,7 +128,6 @@ func (s *DingdongSession) CommitPay(info SettleDeliveryInfo) (*Order, error) {
 	if err != nil {
 		return nil, err
 	}
-
 	resp.Body.Close()
 	if resp.StatusCode == 200 {
 		result := gjson.Parse(string(body))

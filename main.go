@@ -202,11 +202,6 @@ func main() {
 				}
 
 				session.FloorInfo = v
-				session.DeliveryInfoVO = dd.DeliveryInfoVO{
-					StoreDeliveryTemplateId: v.StoreInfo.StoreDeliveryTemplateId,
-					DeliveryModeId:          v.StoreInfo.DeliveryModeId,
-					StoreType:               v.StoreInfo.StoreType,
-				}
 			} else {
 				//无效商品
 				//for index, goods := range v.NormalGoodsList {
@@ -247,7 +242,7 @@ func main() {
 			case dd.OOSErr:
 				goto CartLoop
 			default:
-				goto GoodsLoop
+				goto CartLoop
 			}
 		}
 		if settleInfo, err := session.CheckSettleInfo(); err == nil {
@@ -271,7 +266,7 @@ func main() {
 		}
 	CapacityLoop:
 		fmt.Printf("########## 获取当前可用配送时间【%s】 ###########\n", time.Now().Format("15:04:05"))
-		capacity, err := session.GetCapacity(session.DeliveryInfoVO.StoreDeliveryTemplateId)
+		capacity, err := session.GetCapacity(session.StoreList[session.FloorInfo.StoreId].StoreDeliveryTemplateId)
 		if err != nil {
 			fmt.Println(err)
 			time.Sleep(1 * time.Second)

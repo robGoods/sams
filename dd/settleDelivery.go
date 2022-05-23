@@ -71,14 +71,6 @@ func parseSettleInfo(result gjson.Result) *SettleInfo {
 	return &r
 }
 
-type StoreInfo struct {
-	StoreId                 string `json:"storeId"`
-	StoreType               string `json:"storeType"`
-	AreaBlockId             string `json:"areaBlockId"`
-	StoreDeliveryTemplateId string `json:"-"`
-	DeliveryModeId          string `json:"-"`
-}
-
 type DeliveryInfoVO struct {
 	StoreDeliveryTemplateId string `json:"storeDeliveryTemplateId"`
 	DeliveryModeId          string `json:"deliveryModeId"`
@@ -93,7 +85,7 @@ type SettleParam struct {
 	AddressId      string         `json:"addressId"`
 	DeliveryInfoVO DeliveryInfoVO `json:"deliveryInfoVO"`
 	DeliveryType   int            `json:"cartDeliveryType"`
-	StoreInfo      StoreInfo      `json:"storeInfo"`
+	StoreInfo      Store          `json:"storeInfo"`
 	CouponList     []CouponInfo   `json:"couponList,omitempty"`
 	IsSelfPickup   int            `json:"isSelfPickup"`
 	FloorId        int            `json:"floorId"`
@@ -104,20 +96,24 @@ func (s *DingdongSession) CheckSettleInfo() (*SettleInfo, error) {
 	urlPath := "https://api-sams.walmartmobile.cn/api/v1/sams/trade/settlement/getSettleInfo"
 
 	data := SettleParam{
-		Uid:            s.Uid,
-		AddressId:      s.Address.AddressId,
-		DeliveryInfoVO: s.DeliveryInfoVO,
-		DeliveryType:   s.Conf.DeliveryType,
-		StoreInfo:      s.FloorInfo.StoreInfo,
-		CouponList:     make([]CouponInfo, 0),
-		IsSelfPickup:   0,
-		FloorId:        s.Conf.FloorId,
-		GoodsList:      s.GoodsList,
+		Uid:       s.Uid,
+		AddressId: s.Address.AddressId,
+		DeliveryInfoVO: DeliveryInfoVO{
+			StoreDeliveryTemplateId: s.StoreList[s.FloorInfo.StoreId].StoreDeliveryTemplateId,
+			DeliveryModeId:          s.StoreList[s.FloorInfo.StoreId].DeliveryModeId,
+			StoreType:               s.StoreList[s.FloorInfo.StoreId].StoreType,
+		},
+		DeliveryType: s.Conf.DeliveryType,
+		StoreInfo:    s.StoreList[s.FloorInfo.StoreId],
+		CouponList:   make([]CouponInfo, 0),
+		IsSelfPickup: 0,
+		FloorId:      s.Conf.FloorId,
+		GoodsList:    s.GoodsList,
 	}
 
 	if len(s.Conf.PromotionId) > 0 {
 		for _, id := range s.Conf.PromotionId {
-			data.CouponList = append(data.CouponList, CouponInfo{PromotionId: id, StoreId: s.FloorInfo.StoreInfo.StoreId})
+			data.CouponList = append(data.CouponList, CouponInfo{PromotionId: id, StoreId: s.FloorInfo.StoreId})
 		}
 	}
 	dataStr, _ := json.Marshal(data)

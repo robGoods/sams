@@ -81,7 +81,7 @@ func (s *DingdongSession) CheckGoods() (map[string]NormalGoods, error) {
 	data["storeId"] = ""
 	for _, v := range s.Cart.FloorInfoList {
 		if v.FloorId == s.Conf.FloorId {
-			data["storeId"] = v.StoreInfo.StoreId
+			data["storeId"] = v.StoreId
 		}
 	}
 	data["goodsList"] = s.GoodsList

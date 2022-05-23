@@ -14,14 +14,14 @@ type StoreListParam struct {
 }
 
 type Store struct {
-	StoreId                 string `json:"storeId"`
-	StoreName               string `json:"-"`
-	StoreType               string `json:"storeType"`
-	AreaBlockId             string `json:"areaBlockId"`
-	StoreDeliveryTemplateId string `json:"storeDeliveryTemplateId"`
-	DeliveryModeId          string `json:"deliveryModeId"`
-	DeliveryType            int    `json:"DeliveryType"`
-	Capacity                *Capacity
+	StoreId                 string    `json:"storeId"`
+	StoreName               string    `json:"-"`
+	StoreType               string    `json:"storeType"`
+	AreaBlockId             string    `json:"areaBlockId"`
+	StoreDeliveryTemplateId string    `json:"storeDeliveryTemplateId"`
+	DeliveryModeId          string    `json:"deliveryModeId"`
+	DeliveryType            int       `json:"deliveryType"`
+	Capacity                *Capacity `json:"-"`
 }
 
 func (s *DingdongSession) GetStoreList(result gjson.Result) []Store {
