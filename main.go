@@ -142,7 +142,7 @@ func main() {
 		fmt.Printf("########## 获取购物车中有效商品【%s】 ###########\n", time.Now().Format("15:04:05"))
 		err = session.CheckCart()
 		for _, v := range session.Cart.FloorInfoList {
-			if v.FloorId == session.Conf.FloorId {
+			if v.FloorId == session.Conf.FloorId && v.DeliveryType == session.Conf.DeliveryType {
 				session.GoodsList = make([]dd.Goods, 0)
 				for _, goods := range v.NormalGoodsList {
 					if goods.StockQuantity > 0 && goods.StockStatus && goods.IsPutOnSale && goods.IsAvailable {
@@ -212,7 +212,7 @@ func main() {
 
 		var selGoods = make([]dd.Goods, 0)
 		for index, goods := range session.GoodsList {
-			fmt.Printf("[%v] %s 数量：%v 总价：%d, 是否勾选： %v \n", index, goods.GoodsName, goods.Quantity, goods.Price, goods.IsSelected)
+			fmt.Printf("[%v] %s 数量：%v 总价：%d * %d, 是否勾选： %v \n", index, goods.GoodsName, goods.Quantity, goods.Price, goods.Quantity, goods.IsSelected)
 			if goods.IsSelected && session.Conf.IsSelected {
 				selGoods = append(selGoods, goods)
 			}
