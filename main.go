@@ -35,7 +35,7 @@ var (
 func main() {
 	flag.Parse()
 	if *version {
-		fmt.Println("Rob Sam's 1.5.1 GNU General Public License v3.0")
+		fmt.Println("Rob Sam's 1.7.0 GNU General Public License v3.0")
 		return
 	}
 
@@ -142,7 +142,7 @@ func main() {
 		fmt.Printf("########## 获取购物车中有效商品【%s】 ###########\n", time.Now().Format("15:04:05"))
 		err = session.CheckCart()
 		for _, v := range session.Cart.FloorInfoList {
-			if v.FloorId == session.Conf.FloorId {
+			if v.FloorId == session.Conf.FloorId && v.DeliveryType == session.Conf.DeliveryType {
 				session.GoodsList = make([]dd.Goods, 0)
 				for _, goods := range v.NormalGoodsList {
 					if goods.StockQuantity > 0 && goods.StockStatus && goods.IsPutOnSale && goods.IsAvailable {
@@ -212,7 +212,7 @@ func main() {
 
 		var selGoods = make([]dd.Goods, 0)
 		for index, goods := range session.GoodsList {
-			fmt.Printf("[%v] %s 数量：%v 总价：%d, 是否勾选： %v \n", index, goods.GoodsName, goods.Quantity, goods.Price, goods.IsSelected)
+			fmt.Printf("[%v] %s 数量：%v 总价：%d * %d, 是否勾选： %v \n", index, goods.GoodsName, goods.Quantity, goods.Price, goods.Quantity, goods.IsSelected)
 			if goods.IsSelected && session.Conf.IsSelected {
 				selGoods = append(selGoods, goods)
 			}
@@ -247,6 +247,12 @@ func main() {
 		}
 		if settleInfo, err := session.CheckSettleInfo(); err == nil {
 			fmt.Printf("运费： %s\n", settleInfo.DeliveryFee)
+			if store, ok := session.StoreList[session.FloorInfo.StoreId]; ok && store.StoreDeliveryTemplateId != settleInfo.SettleDelivery.StoreDeliveryTemplateId {
+				store.StoreDeliveryTemplateId = settleInfo.SettleDelivery.StoreDeliveryTemplateId
+				store.AreaBlockId = settleInfo.SettleDelivery.AreaBlockId
+				session.StoreList[session.FloorInfo.StoreId] = store
+			}
+
 			if session.Conf.DeliveryFee && settleInfo.DeliveryFee != "0" {
 				goto CartLoop
 			}
@@ -269,9 +275,14 @@ func main() {
 		capacity, err := session.GetCapacity(session.StoreList[session.FloorInfo.StoreId].StoreDeliveryTemplateId)
 		if err != nil {
 			fmt.Println(err)
-			time.Sleep(1 * time.Second)
-			//刷新可用配送时间， 会出现“服务器正忙,请稍后再试”， 可以忽略。
-			goto CapacityLoop
+			switch err {
+			case dd.CapacityErr:
+				goto StoreLoop
+			default:
+				time.Sleep(1 * time.Second)
+				//刷新可用配送时间， 会出现“服务器正忙,请稍后再试”， 可以忽略。
+				goto CapacityLoop
+			}
 		}
 
 		session.SettleDeliveryInfo = map[int]dd.SettleDeliveryInfo{}
@@ -338,7 +349,7 @@ func main() {
 						goto OrderLoop
 					case dd.OOSErr, dd.PreGoodNotStartSellErr, dd.CartGoodChangeErr, dd.GoodsExceedLimitErr:
 						goto CartLoop
-					case dd.StoreHasClosedError:
+					case dd.StoreHasClosedError, dd.GetDeliveryInfoErr:
 						goto StoreLoop
 					case dd.CloseOrderTimeExceptionErr, dd.DecreaseCapacityCountError, dd.NotDeliverCapCityErr:
 						delete(session.SettleDeliveryInfo, k)

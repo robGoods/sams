@@ -158,6 +158,8 @@ func (s *DingdongSession) CommitPay(info SettleDeliveryInfo) (*Order, error) {
 			return nil, CloudGoodsOverWightErr
 		case "CART_GOOD_CHANGE":
 			return nil, CartGoodChangeErr
+		case "GET_DELIVERY_INFO_ERROR":
+			return nil, GetDeliveryInfoErr
 		default:
 			return nil, errors.New(result.Get("msg").Str)
 		}

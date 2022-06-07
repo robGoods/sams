@@ -29,7 +29,7 @@ func parseSettleDelivery(g gjson.Result) (error, SettleDelivery) {
 		ExpectArrivalTime:       g.Get("expectArrivalTime").Str,
 		ExpectArrivalEndTime:    g.Get("expectArrivalEndTime").Str,
 		StoreDeliveryTemplateId: g.Get("storeDeliveryTemplateId").Str,
-		AreaBlockId:             g.Get("AreaBlockId").Str,
+		AreaBlockId:             g.Get("areaBlockId").Str,
 		AreaBlockName:           g.Get("areaBlockName").Str,
 		FirstPeriod:             int(g.Get("firstPeriod").Num),
 	}
@@ -56,7 +56,6 @@ func parseSettleInfo(result gjson.Result) *SettleInfo {
 	for _, v := range result.Get("data.settleDelivery").Array() {
 		_, settleDelivery := parseSettleDelivery(v)
 		r.SettleDelivery = settleDelivery
-
 	}
 	r.SaasId = result.Get("data.saasId").Str
 	r.Uid = result.Get("data.uid").Str

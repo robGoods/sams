@@ -16,6 +16,7 @@ type Cart struct {
 
 type FloorInfo struct {
 	FloorId                int           `json:"floorId"`
+	DeliveryType           int           `json:"deliveryType"`
 	NormalGoodsList        []NormalGoods `json:"normalGoodsList"`
 	ShortageStockGoodsList []NormalGoods `json:"ShortageStockGoodsList"`
 	AllOutOfStockGoodsList []NormalGoods `json:"allOutOfStockGoodsList"`
@@ -27,6 +28,7 @@ type FloorInfo struct {
 func parseFloorInfos(g gjson.Result) (error, FloorInfo) {
 	r := FloorInfo{
 		FloorId:                int(g.Get("floorId").Num),
+		DeliveryType:           int(g.Get("deliveryType").Num),
 		Amount:                 g.Get("amount").Str,
 		Quantity:               int(g.Get("quantity").Num),
 		StoreId:                g.Get("storeId").Str,
