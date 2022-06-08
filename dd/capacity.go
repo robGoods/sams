@@ -92,7 +92,12 @@ func (s *DingdongSession) GetCapacity(storeDeliveryTemplateId string) (*Capacity
 		switch result.Get("code").Str {
 		case "Success":
 			return parseCapacity(result), nil
+		case "LIMITED":
+			return nil, LimitedErr
 		default:
+			if result.Get("msg").Str == CapacityErr.Error() {
+				return nil, CapacityErr
+			}
 			return nil, errors.New(result.Get("msg").Str)
 		}
 	} else {

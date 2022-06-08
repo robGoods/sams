@@ -35,7 +35,7 @@ var (
 func main() {
 	flag.Parse()
 	if *version {
-		fmt.Println("Rob Sam's 1.5.1 GNU General Public License v3.0")
+		fmt.Println("Rob Sam's 1.7.0 GNU General Public License v3.0")
 		return
 	}
 
@@ -269,9 +269,14 @@ func main() {
 		capacity, err := session.GetCapacity(session.StoreList[session.FloorInfo.StoreId].StoreDeliveryTemplateId)
 		if err != nil {
 			fmt.Println(err)
-			time.Sleep(1 * time.Second)
-			//刷新可用配送时间， 会出现“服务器正忙,请稍后再试”， 可以忽略。
-			goto CapacityLoop
+			switch err {
+			case dd.CapacityErr:
+				goto StoreLoop
+			default:
+				time.Sleep(1 * time.Second)
+				//刷新可用配送时间， 会出现“服务器正忙,请稍后再试”， 可以忽略。
+				goto CapacityLoop
+			}
 		}
 
 		session.SettleDeliveryInfo = map[int]dd.SettleDeliveryInfo{}

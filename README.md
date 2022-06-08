@@ -74,6 +74,11 @@ Usage of ./sams:
 
 ![run.png](https://robgoods.github.io/sams/assets/run.png)
 
+### ☕️ Donate
+
+[![Donate](https://img.shields.io/badge/Donate-WebChat-green.svg)](https://iscod.github.io/images/donate/webchat.png)
+[![Donate](https://img.shields.io/badge/Donate-AliPay-green.svg)](https://iscod.github.io/images/donate/alipay.png)
+
 ## 声明
 本项目仅供学习交流，严禁用作商业行为，特别禁止黄牛加价代抢等！
 
