@@ -247,6 +247,12 @@ func main() {
 		}
 		if settleInfo, err := session.CheckSettleInfo(); err == nil {
 			fmt.Printf("运费： %s\n", settleInfo.DeliveryFee)
+			if store, ok := session.StoreList[session.FloorInfo.StoreId]; ok && store.StoreDeliveryTemplateId != settleInfo.SettleDelivery.StoreDeliveryTemplateId {
+				store.StoreDeliveryTemplateId = settleInfo.SettleDelivery.StoreDeliveryTemplateId
+				store.AreaBlockId = settleInfo.SettleDelivery.AreaBlockId
+				session.StoreList[session.FloorInfo.StoreId] = store
+			}
+
 			if session.Conf.DeliveryFee && settleInfo.DeliveryFee != "0" {
 				goto CartLoop
 			}
@@ -343,7 +349,7 @@ func main() {
 						goto OrderLoop
 					case dd.OOSErr, dd.PreGoodNotStartSellErr, dd.CartGoodChangeErr, dd.GoodsExceedLimitErr:
 						goto CartLoop
-					case dd.StoreHasClosedError:
+					case dd.StoreHasClosedError, dd.GetDeliveryInfoErr:
 						goto StoreLoop
 					case dd.CloseOrderTimeExceptionErr, dd.DecreaseCapacityCountError, dd.NotDeliverCapCityErr:
 						delete(session.SettleDeliveryInfo, k)
